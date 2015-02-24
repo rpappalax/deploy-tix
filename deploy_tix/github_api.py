@@ -85,13 +85,13 @@ class GithubAPI(object):
         return url
 
 
-    def get_commit_url(self, git_sha):
+    def get_commit_url(self, commit_sha):
         """Return commit URL from github API URL as string"""
 
         # print '{}\n{}\n{}'.format(LINE, inspect.stack()[0][3], LINE)
         # print HOST_GITHUB, self.repo, self.application
         url = 'https://api.{}/repos/{}/{}/git/tags/{}'.format(HOST_GITHUB,
-                  self.repo, self.application, git_sha)
+                  self.repo, self.application, commit_sha)
         return url
 
 
@@ -174,7 +174,7 @@ class GithubAPI(object):
         return url
 
 
-    def get_url_tag_commit(self, git_sha):
+    def get_url_tag_commit(self, commit_sha):
         """Return github tag commit SHA URL as string"""
 
         # print '{}\n{}\n{}'.format(LINE, inspect.stack()[0][3], LINE)
@@ -182,7 +182,7 @@ class GithubAPI(object):
             HOST_GITHUB,
             self.repo,
             self.application,
-            git_sha
+            commit_sha
         )
         # print 'URL: {}'.format(url)
         return url
@@ -223,7 +223,7 @@ class GithubAPI(object):
         return req.json()['object']['sha']
 
 
-    def get_changelog(self):
+    def get_changelog(self, commit_sha):
         """"Parse CHANGELOG for latest tag.
 
         Return:
@@ -231,8 +231,8 @@ class GithubAPI(object):
         """
 
         # print '{}\n{}\n{}'.format(LINE, inspect.stack()[0][3], LINE)
-        url = 'https://{}/{}/{}/master/CHANGELOG'.format(
-            HOST_GITHUB_RAW, self.repo, self.application)
+        url = 'https://{}/{}/{}/{}/CHANGELOG'.format(
+            HOST_GITHUB_RAW, self.repo, self.application, commit_sha)
         req = requests.get(url)
         lines = req.text
 
@@ -281,15 +281,15 @@ class GithubAPI(object):
         # this returns master commit
         if self.application == 'loop-client':
             url = self.get_commit_url(self.latest_tags[3][SHA])
-            git_sha = self.get_tag_object_sha(url)
-            # notes += self.get_url_tag_commit(git_sha) + '\n'
+            commit_sha = self.get_tag_object_sha(url)
+            # notes += self.get_url_tag_commit(commit_sha) + '\n'
         else:
             # notes += self.get_url_tag_commit(self.latest_tags[3][SHA]) + '\n'
-            git_sha = self.latest_tags[3][SHA]
+            commit_sha = self.latest_tags[3][SHA]
 
-        notes += self.get_url_tag_commit(git_sha) + '\n'
+        notes += self.get_url_tag_commit(commit_sha) + '\n'
 
-        changelog = self.get_changelog()
+        changelog = self.get_changelog(commit_sha)
         if changelog:
             notes += self.output.get_sub_header('CHANGELOG')
             notes += changelog
@@ -297,7 +297,6 @@ class GithubAPI(object):
 
     def get_commit(self, sha):
         # GET /repos/:owner/:repo/git/commits/:sha
-        #https://github.com/mozilla-services/loop-server/commit/4a6a294e243fa62a98d311fce10e33fa336828fe
         url = 'https://{}/{}/{}'.format(
             HOST_GITHUB, self.repo, self.application, sha)
         self.get_tag_object_sha(url)
