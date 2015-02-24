@@ -25,12 +25,6 @@ def main(args=None):
         help='Example: loop-server',
         required=True)
 
-    # TODO(rpapa): Need to add code to restrict query to <= release_num
-    parser.add_argument(
-        '-n', '--release-num',
-        help='Example: 0.14.3',
-        required=True)
-
     parser.add_argument(
         '-e', '--environment',
         help='Enter: STAGE, PROD',
@@ -45,23 +39,34 @@ def main(args=None):
         '-p', '--bugzilla-password',
         required=True)
 
+    parser.add_argument(
+        '-z', '--bugzilla-prod',
+        help='Add this option, and you\'ll post to bugzilla prod',
+        action='store_true',
+        required=False)
 
     args = vars(parser.parse_args())
 
     repo = args['repo']
     application = args['application']
-    release_num = args['release_num']
-    environment = args['environment'].upper()
+    environment = args['environment']
     bugzilla_username = args['bugzilla_username']
     bugzilla_password = args['bugzilla_password']
+    if args['bugzilla_prod']:
+        exit()
+        url_bugzilla = URL_BUGZILLA_PROD
+    else:
+        url_bugzilla = URL_BUGZILLA_DEV
+
     status = 'NEW'
 
     api = GithubAPI(repo, application, environment)
     description = api.get_release_notes()
-    ticket = BugzillaRESTAPI(
-        URL_BUGZILLA_DEV, bugzilla_username, bugzilla_password)
+    release_num = api.last_tag
 
-    # TODO(rpapa): add a ticket update method
+    ticket = BugzillaRESTAPI(
+        url_bugzilla, bugzilla_username, bugzilla_password)
+
     print ticket.create_bug(
         release_num, application, environment, status, description)
 

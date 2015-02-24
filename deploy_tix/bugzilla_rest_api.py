@@ -9,7 +9,6 @@ import sys
 import json
 import requests
 
-#from deploy_tix.output_helper import OutputHelper
 from output_helper import OutputHelper
 
 URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.com'
@@ -20,13 +19,7 @@ class InvalidCredentials(Exception):
     pass
 
 class BugzillaRESTAPI(object):
-    """"Used for CRUD operations against Bugzilla REST API
-
-    Currently only supports authentication and create NEW.
-    TODO: add bug update
-
-    Use against URL_BUGZILLA_DEV to test.
-    """
+    """"Used for CRUD operations against Bugzilla REST API"""
 
     def __init__(self, host, bugzilla_username, bugzilla_password):
 
@@ -60,8 +53,6 @@ class BugzillaRESTAPI(object):
         return data
 
 
-    # TODO(rpapa): it would save authentication time to cache token for re-use
-    #              add a try / except & query a new one if expired
     def get_token(self, host):
         """Fetch and return bugzilla token.
 
@@ -95,7 +86,11 @@ class BugzillaRESTAPI(object):
 
         Note:
             On bugzilla-dev - available status:
-            UNCONFIRMED, NEW, ASSIGNED, RESOLVED
+            NEW, UNCONFIRMED, ASSIGNED, RESOLVED
+
+            On bugzilla - available status:
+            NEW, UNCONFIRMED, RESOLVED, REOPENED, VERIFIED
+            FIXED, INVALID, WONTFIX, DUPLICATE, WORKSFORME, INCOMPLETE
 
         Returns:
             json string to POST to REST API

@@ -43,7 +43,11 @@ class GithubAPI(object):
         self.tags = self.get_tags()
         self.num_comparisons = self.get_num_comparisons(self.tags)
         self.latest_tags = self.get_latest_tags()
+        self._last_tag = self.latest_tags[3][VERS]
 
+    @property
+    def last_tag(self):
+        return self._last_tag
 
     def set_args(self):
 
