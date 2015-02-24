@@ -26,7 +26,7 @@ all:	build test
 .PHONY: build
 build: $(VENVDIR)/COMPLETE
 $(VENVDIR)/COMPLETE: requirements.txt
-	mkdir build
+	mkdir -p build
 	virtualenv --no-site-packages --python=`which python` --distribute $(VENVDIR)
 	$(INSTALL) -r ./requirements.txt
 	$(PYTHON) ./setup.py develop
@@ -35,8 +35,9 @@ $(VENVDIR)/COMPLETE: requirements.txt
 .PHONY: build-jenkins
 build-jenkins: $(VENVDIR)/COMPLETE
 $(VENVDIR)/COMPLETE: requirements.txt
-	mkdir build
-	virtualenv --no-site-packages --python='/usr/local/bin/python2.7' --distribute $(VENVDIR)
+	mkdir -p build
+	virtualenv --no-site-packages --python='/usr/bin/python2.7' --distribute $(VENVDIR)
+	#virtualenv --no-site-packages --python='/usr/local/bin/python3.4' --distribute $(VENVDIR)
 	$(INSTALL) -r ./requirements.txt
 	$(PYTHON) ./setup.py develop
 	touch $(VENVDIR)/COMPLETE

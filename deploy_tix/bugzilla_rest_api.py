@@ -9,7 +9,8 @@ import sys
 import json
 import requests
 
-from deploy_tix.output_helper import OutputHelper
+#from deploy_tix.output_helper import OutputHelper
+from output_helper import OutputHelper
 
 URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.com'
 URL_BUGZILLA_DEV = 'https://bugzilla-dev.allizom.org'

@@ -51,12 +51,12 @@ def main(args=None):
     repo = args['repo']
     application = args['application']
     release_num = args['release_num']
-    environment = args['environment']
+    environment = args['environment'].upper()
     bugzilla_username = args['bugzilla_username']
     bugzilla_password = args['bugzilla_password']
     status = 'NEW'
 
-    api = GithubAPI(repo, application, release_num, environment)
+    api = GithubAPI(repo, application, environment)
     description = api.get_release_notes()
     ticket = BugzillaRESTAPI(
         URL_BUGZILLA_DEV, bugzilla_username, bugzilla_password)
