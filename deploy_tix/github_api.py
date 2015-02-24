@@ -11,8 +11,9 @@ import argparse
 import requests
 import json
 import inspect
-#from deploy_tix.output_helper import OutputHelper
 from output_helper import OutputHelper
+
+DEBUG = True
 
 HOST_GITHUB = 'github.com'
 HOST_GITHUB_RAW = 'raw.githubusercontent.com'
@@ -82,8 +83,7 @@ class GithubAPI(object):
     def get_api_url(self):
         """Return github API URL as string"""
 
-        # print '{}\n{}\n{}'.format(LINE, inspect.stack()[0][3], LINE)
-        url = 'https://api.{}/repos/{}/{}/git/refs/tags'.format(
+        url = 'https://api.{}/repos/{}/{}/git/'.format(
             HOST_GITHUB, self.repo, self.application)
         # print 'URL: {}'.format(url)
         return url
@@ -92,8 +92,6 @@ class GithubAPI(object):
     def get_commit_url(self, commit_sha):
         """Return commit URL from github API URL as string"""
 
-        # print '{}\n{}\n{}'.format(LINE, inspect.stack()[0][3], LINE)
-        # print HOST_GITHUB, self.repo, self.application
         url = 'https://api.{}/repos/{}/{}/git/tags/{}'.format(HOST_GITHUB,
                   self.repo, self.application, commit_sha)
         return url
@@ -102,7 +100,6 @@ class GithubAPI(object):
     def get_json_response(self, url):
         """Get all tags as json from Github API."""
 
-        # print '{}\n{}\n{}'.format(LINE, inspect.stack()[0][3], LINE)
         req = requests.get(url)
         try:
             if 'Not Found' in req.text:
@@ -114,17 +111,13 @@ class GithubAPI(object):
                 url)
             sys.exit(err_msg)
         else:
-            # print 'REQ.TEXT: {}'.format(req.text)
-            # print 'REQ.JSON: {}'.format(req.json()['object']['sha'])
             return req
 
 
     def get_tags(self):
         """Get all tags as json from Github API."""
 
-        # print '{}\n{}\n{}'.format(LINE, inspect.stack()[0][3], LINE)
-        # print 'API_URL: {}'.format(self.api_url)
-        req = requests.get(self.api_url)
+        req = requests.get(self.api_url + 'refs/tags')
         try:
             if 'Not Found' in req.text:
                 raise NotFoundError
@@ -132,7 +125,7 @@ class GithubAPI(object):
             err_header = self.output.get_header('ERROR')
             err_msg = '{}\nNothing found at: \n{}\nABORTING!\n\n'.format(
                 err_header,
-                self.api_url)
+                self.api_url + 'refs/tags')
             sys.exit(err_msg)
         else:
             return json.loads(req.text)
@@ -145,20 +138,15 @@ class GithubAPI(object):
             list of lists containing: [release_num, git sha] for last tags
         """
 
-        # print '{}\n{}\n{}'.format(LINE, inspect.stack()[0][3], LINE)
         start = len(self.tags) - self.num_comparisons
-        # print 'LEN(TAGS): {}, NUM_COMPARISONS: {}'.format(
-        #     len(self.tags), self.num_comparisons)
         tags = self.tags
         latest = []
         for i in xrange(len(tags)):
             print
             if i >= start:
-                # print 'TAGS: {}'.format(tags[i])
                 parts = tags[i]['ref'].split('/')
                 release_num = parts[2]
                 sha = tags[i]['object']['sha']
-                # print sha
                 tag = [release_num, sha]
                 latest.append(tag)
         return latest
@@ -168,7 +156,6 @@ class GithubAPI(object):
     def get_url_tag_release(self, release_num):
         """Return github tag release URL as string"""
 
-        # print '{}\n{}\n{}'.format(LINE, inspect.stack()[0][3], LINE)
         url = 'https://{}/{}/{}/releases/tag/{}'.format(
             HOST_GITHUB,
             self.repo,
@@ -181,21 +168,18 @@ class GithubAPI(object):
     def get_url_tag_commit(self, commit_sha):
         """Return github tag commit SHA URL as string"""
 
-        # print '{}\n{}\n{}'.format(LINE, inspect.stack()[0][3], LINE)
         url = 'https://{}/{}/{}/commit/{}'.format(
             HOST_GITHUB,
             self.repo,
             self.application,
             commit_sha
         )
-        # print 'URL: {}'.format(url)
         return url
 
 
     def get_comparison(self, start, end):
         """Return github compare URL as string"""
 
-        # print '{}\n{}\n{}'.format(LINE, inspect.stack()[0][3], LINE)
         return 'https://{}/{}/{}/compare/{}...{}'.format(
             HOST_GITHUB, self.repo, self.application, start, end) + '\n'
 
@@ -207,7 +191,6 @@ class GithubAPI(object):
             integer - num of github release comparisons to display
         """
 
-        # print '{}\n{}\n{}'.format(LINE, inspect.stack()[0][3], LINE)
         count = len(tags)
         if count >= MAX_COMPARISONS_TO_SHOW:
             return MAX_COMPARISONS_TO_SHOW
@@ -215,14 +198,12 @@ class GithubAPI(object):
 
 
     def get_tag_object_sha(self, api_url):
-        """Get object sha for tag commit
+        """Get object SHA for tag commit
 
         Returns:
             string - object sha
         """
 
-        # print '{}\n{}\n{}'.format(LINE, inspect.stack()[0][3], LINE)
-        # print 'API_URL: {}'.format(api_url)
         req = self.get_json_response(api_url)
         return req.json()['object']['sha']
 
@@ -234,7 +215,6 @@ class GithubAPI(object):
             String with log from latest tag.
         """
 
-        # print '{}\n{}\n{}'.format(LINE, inspect.stack()[0][3], LINE)
         url = 'https://{}/{}/{}/{}/CHANGELOG'.format(
             HOST_GITHUB_RAW, self.repo, self.application, commit_sha)
         req = requests.get(url)
@@ -254,20 +234,15 @@ class GithubAPI(object):
                 log += line + '\n'
         return log
 
-
-    def get_release_notes(self):
-        """Constructs release notes for Bugzilla service deployment ticket.
-
-        Returns:
-            String - with release notes
-        """
-
-        # print '{}\n{}\n{}'.format(LINE, inspect.stack()[0][3], LINE)
+    def _get_section_release_notes(self):
         notes = self.output.get_header('RELEASE NOTES')
         notes += 'https://{}/{}/{}/releases'.format(
             HOST_GITHUB, self.repo, self.application) + '\n'
+        return notes
 
-        notes += self.output.get_sub_header('COMPARISONS')
+
+    def _get_section_comparisons(self):
+        notes = self.output.get_sub_header('COMPARISONS')
         notes += self.get_comparison(self.latest_tags[0][VERS],
                                      self.latest_tags[1][VERS])
 
@@ -278,32 +253,50 @@ class GithubAPI(object):
         if len(self.latest_tags) >= MAX_COMPARISONS_TO_SHOW:
             notes += self.get_comparison(self.latest_tags[2][VERS],
                                          self.latest_tags[3][VERS])
+        return notes
 
-        notes += self.output.get_sub_header('TAGS')
+
+    def _get_section_tags(self):
+        notes = self.output.get_sub_header('TAGS')
         notes += self.get_url_tag_release(self.latest_tags[3][VERS]) + '\n'
-
-        # this returns master commit
         if self.application == 'loop-client':
             url = self.get_commit_url(self.latest_tags[3][SHA])
             commit_sha = self.get_tag_object_sha(url)
-            # notes += self.get_url_tag_commit(commit_sha) + '\n'
         else:
-            # notes += self.get_url_tag_commit(self.latest_tags[3][SHA]) + '\n'
             commit_sha = self.latest_tags[3][SHA]
 
         notes += self.get_url_tag_commit(commit_sha) + '\n'
+        notes += self._get_section_changelog(commit_sha)
+        return notes
 
+
+    def _get_section_changelog(self, commit_sha):
         changelog = self.get_changelog(commit_sha)
         if changelog:
-            notes += self.output.get_sub_header('CHANGELOG')
-            notes += changelog
+            return self.output.get_sub_header('CHANGELOG') + changelog
+        else:
+            return ''
+
+
+    def get_release_notes(self):
+        """Constructs release notes for Bugzilla service deployment ticket.
+
+        Returns:
+            String - with release notes
+        """
+
+        notes = self._get_section_release_notes()
+        notes += self._get_section_comparisons()
+        notes += self._get_section_tags()
         return notes
+
 
     def get_commit(self, sha):
         # GET /repos/:owner/:repo/git/commits/:sha
         url = 'https://{}/{}/{}'.format(
             HOST_GITHUB, self.repo, self.application, sha)
         self.get_tag_object_sha(url)
+
 
 def main():
 
