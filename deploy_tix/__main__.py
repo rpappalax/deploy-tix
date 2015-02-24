@@ -45,6 +45,11 @@ def main(args=None):
         '-p', '--bugzilla-password',
         required=True)
 
+    parser.add_argument(
+        '-z', '--bugzilla-prod',
+        help='Add this option, and you\'ll post to bugzilla prod',
+        action='store_true',
+        required=False)
 
     args = vars(parser.parse_args())
 
@@ -54,12 +59,17 @@ def main(args=None):
     environment = args['environment']
     bugzilla_username = args['bugzilla_username']
     bugzilla_password = args['bugzilla_password']
+    if args['bugzilla_prod']:
+        url_bugzilla = URL_BUGZILLA_PROD
+    else:
+        url_bugzilla = URL_BUGZILLA_DEV
+
     status = 'NEW'
 
     api = GithubAPI(repo, application, release_num, environment)
     description = api.get_release_notes()
     ticket = BugzillaRESTAPI(
-        URL_BUGZILLA_DEV, bugzilla_username, bugzilla_password)
+        url_bugzilla, bugzilla_username, bugzilla_password)
 
     # TODO(rpapa): add a ticket update method
     print ticket.create_bug(

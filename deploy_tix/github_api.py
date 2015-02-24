@@ -126,42 +126,6 @@ class GithubAPI(object):
         return latest
 
 
-    def get_release_notes(self):
-        """Constructs release notes for Bugzilla service deployment ticket.
-
-        Returns:
-            String - with release notes
-        """
-
-        notes = self.output.get_header('RELEASE NOTES')
-        notes += 'https://{}/{}/{}/releases'.format(HOST_GITHUB, \
-                  self.repo, self.product) + '\n'
-
-        notes += self.output.get_sub_header('COMPARISONS')
-        notes += self.get_comparison(self.latest_tags[0][VERS],
-                                     self.latest_tags[1][VERS])
-
-        if len(self.latest_tags) >= (MAX_COMPARISONS_TO_SHOW - 1):
-            notes += self.get_comparison(self.latest_tags[1][VERS],
-                                         self.latest_tags[2][VERS])
-
-        if len(self.latest_tags) >= MAX_COMPARISONS_TO_SHOW:
-            notes += self.get_comparison(self.latest_tags[2][VERS],
-                                         self.latest_tags[3][VERS])
-
-        tag_data = self.get_tag(self.latest_tags[3][SHA])
-
-        notes += self.output.get_sub_header('TAGS')
-        notes += self.get_url_tag_release(self.latest_tags[3][VERS]) + '\n'
-        notes += self.get_url_tag_commit(tag_data["object"]["sha"]) + '\n'
-
-        changelog = self.get_changelog(tag_data["object"]["sha"])
-        if changelog:
-            notes += self.output.get_sub_header('CHANGELOG')
-            notes += changelog
-        return notes
-
-
     def get_url_tag_release(self, release_num):
         """Return github tag release URL as string"""
 
@@ -232,6 +196,44 @@ class GithubAPI(object):
             if flag:
                 log += line + '\n'
         return log
+
+
+    def get_release_notes(self):
+        """Constructs release notes for Bugzilla service deployment ticket.
+
+        Returns:
+            String - with release notes
+        """
+
+        notes = self.output.get_header('RELEASE NOTES')
+        notes += 'https://{}/{}/{}/releases'.format(HOST_GITHUB, \
+                                                    self.repo, self.product) + '\n'
+
+        notes += self.output.get_sub_header('COMPARISONS')
+        notes += self.get_comparison(self.latest_tags[0][VERS],
+                                     self.latest_tags[1][VERS])
+
+        if len(self.latest_tags) >= (MAX_COMPARISONS_TO_SHOW - 1):
+            notes += self.get_comparison(self.latest_tags[1][VERS],
+                                         self.latest_tags[2][VERS])
+
+        if len(self.latest_tags) >= MAX_COMPARISONS_TO_SHOW:
+            notes += self.get_comparison(self.latest_tags[2][VERS],
+                                         self.latest_tags[3][VERS])
+
+        tag_data = self.get_tag(self.latest_tags[3][SHA])
+
+        notes += self.output.get_sub_header('TAGS')
+        notes += self.get_url_tag_release(self.latest_tags[3][VERS]) + '\n'
+        notes += self.get_url_tag_commit(tag_data["object"]["sha"]) + '\n'
+
+        changelog = self.get_changelog(tag_data["object"]["sha"])
+        if changelog:
+            notes += self.output.get_sub_header('CHANGELOG')
+            notes += changelog
+        return notes
+
+
 
 def main():
 
