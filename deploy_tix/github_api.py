@@ -10,10 +10,7 @@ import sys
 import argparse
 import requests
 import json
-import inspect
 from output_helper import OutputHelper
-
-DEBUG = True
 
 HOST_GITHUB = 'github.com'
 HOST_GITHUB_RAW = 'raw.githubusercontent.com'
@@ -41,9 +38,9 @@ class GithubAPI(object):
             self.set_args()
 
         self.api_url = self.get_api_url()
-        self.tags = self.get_tags()
-        self.num_comparisons = self.get_num_comparisons(self.tags)
-        self.latest_tags = self.get_latest_tags()
+        self._tags = self.get_tags()
+        self.num_comparisons = self.get_num_comparisons(self._tags)
+        self.latest_tags = self._get_latest_tags()
         self._last_tag = self.latest_tags[3][VERS]
 
     @property
@@ -131,18 +128,18 @@ class GithubAPI(object):
             return json.loads(req.text)
 
 
-    def get_latest_tags(self):
-        """Github API can only return all tags, but we only want the latest.
+    def _get_latest_tags(self):
+        """Github API returns all tags indiscriminately, but
+        we only want the latest.
 
         Return:
             list of lists containing: [release_num, git sha] for last tags
         """
 
-        start = len(self.tags) - self.num_comparisons
-        tags = self.tags
+        start = len(self._tags) - self.num_comparisons
+        tags = self._tags
         latest = []
         for i in xrange(len(tags)):
-            print
             if i >= start:
                 parts = tags[i]['ref'].split('/')
                 release_num = parts[2]
@@ -151,6 +148,17 @@ class GithubAPI(object):
                 latest.append(tag)
         return latest
 
+
+    def _get_commit_sha(self):
+        """Return git commit sha as string"""
+
+        # if ['object']['type'] == 'tag'
+        if self.application in ['msisdn-gateway','loop-client', 'pushgo'] :
+            url = self.get_commit_url(self.latest_tags[3][SHA])
+            req = self.get_json_response(url)
+            return req.json()['object']['sha']
+        else:
+            return self.latest_tags[3][SHA]
 
 
     def get_url_tag_release(self, release_num):
@@ -197,23 +205,8 @@ class GithubAPI(object):
         return count
 
 
-    def get_tag_object_sha(self, api_url):
-        """Get object SHA for tag commit
-
-        Returns:
-            string - object sha
-        """
-
-        req = self.get_json_response(api_url)
-        return req.json()['object']['sha']
-
-
-    def get_changelog(self, commit_sha):
-        """"Parse CHANGELOG for latest tag.
-
-        Return:
-            String with log from latest tag.
-        """
+    def _get_changelog(self, commit_sha):
+        """"Parse and return CHANGELOG for latest tag as string"""
 
         url = 'https://{}/{}/{}/{}/CHANGELOG'.format(
             HOST_GITHUB_RAW, self.repo, self.application, commit_sha)
@@ -234,7 +227,10 @@ class GithubAPI(object):
                 log += line + '\n'
         return log
 
+
     def _get_section_release_notes(self):
+        """Return bugzilla release notes with header as string"""
+
         notes = self.output.get_header('RELEASE NOTES')
         notes += 'https://{}/{}/{}/releases'.format(
             HOST_GITHUB, self.repo, self.application) + '\n'
@@ -242,6 +238,8 @@ class GithubAPI(object):
 
 
     def _get_section_comparisons(self):
+        """Return github links to tag comparisons"""
+
         notes = self.output.get_sub_header('COMPARISONS')
         notes += self.get_comparison(self.latest_tags[0][VERS],
                                      self.latest_tags[1][VERS])
@@ -257,21 +255,16 @@ class GithubAPI(object):
 
 
     def _get_section_tags(self):
+        commit_sha = self._get_commit_sha()
         notes = self.output.get_sub_header('TAGS')
         notes += self.get_url_tag_release(self.latest_tags[3][VERS]) + '\n'
-        if self.application == 'loop-client':
-            url = self.get_commit_url(self.latest_tags[3][SHA])
-            commit_sha = self.get_tag_object_sha(url)
-        else:
-            commit_sha = self.latest_tags[3][SHA]
-
         notes += self.get_url_tag_commit(commit_sha) + '\n'
         notes += self._get_section_changelog(commit_sha)
         return notes
 
 
     def _get_section_changelog(self, commit_sha):
-        changelog = self.get_changelog(commit_sha)
+        changelog = self._get_changelog(commit_sha)
         if changelog:
             return self.output.get_sub_header('CHANGELOG') + changelog
         else:
