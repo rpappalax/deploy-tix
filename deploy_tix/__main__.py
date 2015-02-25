@@ -18,7 +18,7 @@ def main(args=None):
         '-r', '--repo',
         help='Example: mozilla-services',
         default='mozilla-services',
-        required=True)
+        required=False)
 
     parser.add_argument(
         '-a', '--application',

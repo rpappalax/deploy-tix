@@ -10,4 +10,3 @@ Still under heavy development. FOR OPS USE AND DEMO ONLY.
  * loop-client
  * msisdn-gateway
  * shavar
- * pushgo

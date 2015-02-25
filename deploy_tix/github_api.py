@@ -1,13 +1,11 @@
 """Module for constructing service deployment release notes using github api
 
 Note:
-
-Github tags API only deals with tag objects - so only annotated tags,
-not lightweight tags.
+    Github tags API only deals with tag objects - so
+    only annotated tags, not lightweight tags.
 """
 
 import sys
-import argparse
 import requests
 import json
 from output_helper import OutputHelper
@@ -17,25 +15,25 @@ HOST_GITHUB_RAW = 'raw.githubusercontent.com'
 MAX_COMPARISONS_TO_SHOW = 4
 VERS = 0
 SHA = 1
+TYPE = 2
 LINE = '------------------'
-NL = '\n'
+
 
 class NotFoundError(Exception):
     pass
 
 class GithubAPI(object):
-    """Used for GET operations against github API.
-    """
+    """Used for GET operations against github API."""
 
-    def __init__(self, repo='', application='', environment=''):
+    def __init__(self, repo, application, environment):
 
         self.output = OutputHelper()
         if all([repo, application, environment]):
             self.repo = repo
             self.application = application
-            self.environment = environment
+            self.environment = environment.upper()
         else:
-            self.set_args()
+            exit('\nMissing github param\n\nABORTING!\n\n')
 
         self.api_url = self.get_api_url()
         self._tags = self.get_tags()
@@ -47,42 +45,11 @@ class GithubAPI(object):
     def last_tag(self):
         return self._last_tag
 
-    def set_args(self):
-
-        parser = argparse.ArgumentParser(
-            description='Scripts for grabbing release tag info from '
-                        'github API',
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-        parser.add_argument(
-            '-r', '--repo',
-            default='mozilla-services',
-            required=True)
-
-        parser.add_argument(
-            '-a', '--application',
-            help='Example: loop-server',
-            required=True)
-
-        parser.add_argument(
-            '-e', '--environment',
-            help='Enter: stage, prod',
-            default='stage',
-            required=False)
-
-        args = vars(parser.parse_args())
-
-        self.repo = args['repo']
-        self.application = args['application']
-        self.environment = args['environment'].upper()
-
-
     def get_api_url(self):
         """Return github API URL as string"""
 
         url = 'https://api.{}/repos/{}/{}/git/'.format(
             HOST_GITHUB, self.repo, self.application)
-        # print 'URL: {}'.format(url)
         return url
 
 
@@ -144,21 +111,26 @@ class GithubAPI(object):
                 parts = tags[i]['ref'].split('/')
                 release_num = parts[2]
                 sha = tags[i]['object']['sha']
-                tag = [release_num, sha]
+                type = tags[i]['object']['type']
+                tag = [release_num, sha, type]
                 latest.append(tag)
         return latest
 
 
     def _get_commit_sha(self):
-        """Return git commit sha as string"""
+        """Return tag commit sha as string.
 
-        # if ['object']['type'] == 'tag'
-        if self.application in ['msisdn-gateway','loop-client', 'pushgo'] :
-            url = self.get_commit_url(self.latest_tags[3][SHA])
+        Note:
+            Varies depending on object type: type='tag' or 'commit'
+            type='tag' requires a secondary call to retrieve commit url"""
+
+        latest_tag = self.latest_tags[3]
+        if latest_tag[TYPE] == 'tag':
+            url = self.get_commit_url(latest_tag[SHA])
             req = self.get_json_response(url)
             return req.json()['object']['sha']
         else:
-            return self.latest_tags[3][SHA]
+            return latest_tag[SHA]
 
 
     def get_url_tag_release(self, release_num):
@@ -272,11 +244,7 @@ class GithubAPI(object):
 
 
     def get_release_notes(self):
-        """Constructs release notes for Bugzilla service deployment ticket.
-
-        Returns:
-            String - with release notes
-        """
+        """Return release notes as string for Bugzilla deployment ticket."""
 
         notes = self._get_section_release_notes()
         notes += self._get_section_comparisons()
