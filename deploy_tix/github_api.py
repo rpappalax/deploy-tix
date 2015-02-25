@@ -8,7 +8,9 @@ Note:
 import sys
 import requests
 import json
+import itertools
 from output_helper import OutputHelper
+
 
 HOST_GITHUB = 'github.com'
 HOST_GITHUB_RAW = 'raw.githubusercontent.com'
@@ -17,6 +19,12 @@ VERS = 0
 SHA = 1
 TYPE = 2
 LINE = '------------------'
+LOG_NAMES = ['CHANGES', 'CHANGELOG', 'ChangeLog']
+EXT = ['', '.rst', '.txt', '.RST', '.md']
+
+LOG_FILES = []
+[LOG_FILES.append(''.join(parts)) for parts in list(
+    itertools.product(*[LOG_NAMES, EXT]))]
 
 
 class NotFoundError(Exception):
@@ -35,17 +43,46 @@ class GithubAPI(object):
         else:
             exit('\nMissing github param\n\nABORTING!\n\n')
 
-        self.api_url = self.get_api_url()
+        self._api_url = self._get_api_url()
         self._tags = self.get_tags()
-        self.num_comparisons = self.get_num_comparisons(self._tags)
+        self._max_comparisons = self._get_max_comparisons(self._tags)
         self.latest_tags = self._get_latest_tags()
-        self._last_tag = self.latest_tags[3][VERS]
+        self._last_tag = self._get_last_tag()
+        self._last_tag_version = \
+            self._last_tag[VERS]
 
     @property
     def last_tag(self):
-        return self._last_tag
+        return self._last_tag_version
 
-    def get_api_url(self):
+    @last_tag.setter
+    def last_tag(self, value):
+        return self._last_tag_version
+
+
+    def _get_last_tag(self):
+        return self.latest_tags[self._max_comparisons - 1]
+
+
+    def _get_max_comparisons(self, tags):
+        """Calculates max comparisons to show
+
+        Note:
+            Display up to: MAX_COMPARISONS_TO_SHOW (if we have that many tags).
+            otherwise, displays what we do have.
+
+        Returns:
+            integer - num of github release comparisons to display
+        """
+
+        count = len(tags)
+        if count >= MAX_COMPARISONS_TO_SHOW:
+            return MAX_COMPARISONS_TO_SHOW
+        else:
+            return count
+
+
+    def _get_api_url(self):
         """Return github API URL as string"""
 
         url = 'https://api.{}/repos/{}/{}/git/'.format(
@@ -53,7 +90,7 @@ class GithubAPI(object):
         return url
 
 
-    def get_commit_url(self, commit_sha):
+    def _get_commit_url(self, commit_sha):
         """Return commit URL from github API URL as string"""
 
         url = 'https://api.{}/repos/{}/{}/git/tags/{}'.format(HOST_GITHUB,
@@ -81,7 +118,7 @@ class GithubAPI(object):
     def get_tags(self):
         """Get all tags as json from Github API."""
 
-        req = requests.get(self.api_url + 'refs/tags')
+        req = requests.get(self._api_url + 'refs/tags')
         try:
             if 'Not Found' in req.text:
                 raise NotFoundError
@@ -89,7 +126,7 @@ class GithubAPI(object):
             err_header = self.output.get_header('ERROR')
             err_msg = '{}\nNothing found at: \n{}\nABORTING!\n\n'.format(
                 err_header,
-                self.api_url + 'refs/tags')
+                self._api_url + 'refs/tags')
             sys.exit(err_msg)
         else:
             return json.loads(req.text)
@@ -100,10 +137,11 @@ class GithubAPI(object):
         we only want the latest.
 
         Return:
-            list of lists containing: [release_num, git sha] for last tags
+            list of lists containing: [release_num, commit sha,
+            object type] for last tags
         """
 
-        start = len(self._tags) - self.num_comparisons
+        start = len(self._tags)  - self._max_comparisons
         tags = self._tags
         latest = []
         for i in xrange(len(tags)):
@@ -114,6 +152,7 @@ class GithubAPI(object):
                 type = tags[i]['object']['type']
                 tag = [release_num, sha, type]
                 latest.append(tag)
+
         return latest
 
 
@@ -124,16 +163,16 @@ class GithubAPI(object):
             Varies depending on object type: type='tag' or 'commit'
             type='tag' requires a secondary call to retrieve commit url"""
 
-        latest_tag = self.latest_tags[3]
+        latest_tag = self._last_tag
         if latest_tag[TYPE] == 'tag':
-            url = self.get_commit_url(latest_tag[SHA])
+            url = self._get_commit_url(latest_tag[SHA])
             req = self.get_json_response(url)
             return req.json()['object']['sha']
         else:
             return latest_tag[SHA]
 
 
-    def get_url_tag_release(self, release_num):
+    def _get_url_tag_release(self, release_num):
         """Return github tag release URL as string"""
 
         url = 'https://{}/{}/{}/releases/tag/{}'.format(
@@ -163,30 +202,32 @@ class GithubAPI(object):
         return 'https://{}/{}/{}/compare/{}...{}'.format(
             HOST_GITHUB, self.repo, self.application, start, end) + '\n'
 
-    def get_num_comparisons(self, tags):
-        """Display up to: MAX_COMPARISONS_TO_SHOW (if we have that many tags).
-        If not, display comparisons of all tags.
-
-        Returns:
-            integer - num of github release comparisons to display
-        """
-
-        count = len(tags)
-        if count >= MAX_COMPARISONS_TO_SHOW:
-            return MAX_COMPARISONS_TO_SHOW
-        return count
-
 
     def _get_changelog(self, commit_sha):
         """"Parse and return CHANGELOG for latest tag as string"""
 
         url = 'https://{}/{}/{}/{}/CHANGELOG'.format(
             HOST_GITHUB_RAW, self.repo, self.application, commit_sha)
-        req = requests.get(url)
-        lines = req.text
 
-        first = self.latest_tags[self.num_comparisons - 1][VERS]
-        last = self.latest_tags[self.num_comparisons - 2][VERS]
+        for log_name in LOG_FILES:
+            url = 'https://{}/{}/{}/{}/{}'.format(
+                HOST_GITHUB_RAW, self.repo,
+                self.application, commit_sha, log_name)
+            req = requests.get(url)
+            try:
+                if 'Not Found' in req.text:
+                    raise NotFoundError
+            except NotFoundError:
+                pass
+            else:
+                break
+
+        if req.text  == 'Not Found':
+            return ''
+
+        lines = req.text
+        first = self.latest_tags[self._max_comparisons - 1][VERS]
+        last = self.latest_tags[self._max_comparisons - 2][VERS]
         flag = False
 
         log = ''
@@ -213,23 +254,17 @@ class GithubAPI(object):
         """Return github links to tag comparisons"""
 
         notes = self.output.get_sub_header('COMPARISONS')
-        notes += self.get_comparison(self.latest_tags[0][VERS],
-                                     self.latest_tags[1][VERS])
-
-        if len(self.latest_tags) >= (MAX_COMPARISONS_TO_SHOW - 1):
-            notes += self.get_comparison(self.latest_tags[1][VERS],
-                                         self.latest_tags[2][VERS])
-
-        if len(self.latest_tags) >= MAX_COMPARISONS_TO_SHOW:
-            notes += self.get_comparison(self.latest_tags[2][VERS],
-                                         self.latest_tags[3][VERS])
+        for i in xrange(0, self._max_comparisons - 1):
+            notes += self.get_comparison(self.latest_tags[i][VERS],
+                                         self.latest_tags[i + 1][VERS])
         return notes
 
 
     def _get_section_tags(self):
         commit_sha = self._get_commit_sha()
         notes = self.output.get_sub_header('TAGS')
-        notes += self.get_url_tag_release(self.latest_tags[3][VERS]) + '\n'
+        notes += self._get_url_tag_release(
+            self.latest_tags[self._max_comparisons - 1][VERS]) + '\n'
         notes += self.get_url_tag_commit(commit_sha) + '\n'
         notes += self._get_section_changelog(commit_sha)
         return notes
@@ -250,13 +285,6 @@ class GithubAPI(object):
         notes += self._get_section_comparisons()
         notes += self._get_section_tags()
         return notes
-
-
-    def get_commit(self, sha):
-        # GET /repos/:owner/:repo/git/commits/:sha
-        url = 'https://{}/{}/{}'.format(
-            HOST_GITHUB, self.repo, self.application, sha)
-        self.get_tag_object_sha(url)
 
 
 def main():
