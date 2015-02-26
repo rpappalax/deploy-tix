@@ -43,20 +43,17 @@ class GithubAPI(object):
         else:
             exit('\nMissing github param\n\nABORTING!\n\n')
 
-        self._api_url = self._get_api_url()
-        self._tags = self.get_tags()
+        self._url_github = self._get_url_github()
+        self._api_url = self._get_url_github_api()
+        req = self._get_tags(self._api_url + '/refs/tags')
+        self._tags = req.json()
         self._max_comparisons = self._get_max_comparisons(self._tags)
         self.latest_tags = self._get_latest_tags()
         self._last_tag = self._get_last_tag()
-        self._last_tag_version = \
-            self._last_tag[VERS]
+        self._last_tag_version = self._last_tag[VERS]
 
     @property
     def last_tag(self):
-        return self._last_tag_version
-
-    @last_tag.setter
-    def last_tag(self, value):
         return self._last_tag_version
 
 
@@ -82,23 +79,26 @@ class GithubAPI(object):
             return count
 
 
-    def _get_api_url(self):
+    def _get_url_github_api(self):
         """Return github API URL as string"""
 
-        url = 'https://api.{}/repos/{}/{}/git/'.format(
-            HOST_GITHUB, self.repo, self.application)
+        url = 'https://api.{}/repos/{}/{}/git'.format(
+            HOST_GITHUB,
+            self.repo,
+            self.application)
         return url
 
+    def _get_url_github(self):
+        """Return github root URL as string"""
 
-    def _get_commit_url(self, commit_sha):
-        """Return commit URL from github API URL as string"""
-
-        url = 'https://api.{}/repos/{}/{}/git/tags/{}'.format(HOST_GITHUB,
-                  self.repo, self.application, commit_sha)
+        url = 'https://{}/{}/{}'.format(
+            HOST_GITHUB,
+            self.repo,
+            self.application
+        )
         return url
 
-
-    def get_json_response(self, url):
+    def _get_tags(self, url):
         """Get all tags as json from Github API."""
 
         req = requests.get(url)
@@ -108,28 +108,11 @@ class GithubAPI(object):
         except NotFoundError:
             err_header = self.output.get_header('ERROR')
             err_msg = '{}\nNothing found at: \n{}\nABORTING!\n\n'.format(
-                err_header,
-                url)
+                err_header, url)
             sys.exit(err_msg)
         else:
             return req
 
-
-    def get_tags(self):
-        """Get all tags as json from Github API."""
-
-        req = requests.get(self._api_url + 'refs/tags')
-        try:
-            if 'Not Found' in req.text:
-                raise NotFoundError
-        except NotFoundError:
-            err_header = self.output.get_header('ERROR')
-            err_msg = '{}\nNothing found at: \n{}\nABORTING!\n\n'.format(
-                err_header,
-                self._api_url + 'refs/tags')
-            sys.exit(err_msg)
-        else:
-            return json.loads(req.text)
 
 
     def _get_latest_tags(self):
@@ -163,56 +146,44 @@ class GithubAPI(object):
             Varies depending on object type: type='tag' or 'commit'
             type='tag' requires a secondary call to retrieve commit url"""
 
-        latest_tag = self._last_tag
-        if latest_tag[TYPE] == 'tag':
-            url = self._get_commit_url(latest_tag[SHA])
-            req = self.get_json_response(url)
+        last_tag = self._last_tag
+        if last_tag[TYPE] == 'tag':
+            url = '{}/tags/{}'.format( self._api_url, last_tag[SHA])
+            req = self._get_tags(url)
             return req.json()['object']['sha']
         else:
-            return latest_tag[SHA]
+            return last_tag[SHA]
 
 
     def _get_url_tag_release(self, release_num):
         """Return github tag release URL as string"""
 
-        url = 'https://{}/{}/{}/releases/tag/{}'.format(
-            HOST_GITHUB,
-            self.repo,
-            self.application,
-            release_num
-        )
-        return url
+        return '{}/releases/tag/{}'.format(self._url_github, release_num)
 
 
-    def get_url_tag_commit(self, commit_sha):
+    def _get_url_tag_commit(self, commit_sha):
         """Return github tag commit SHA URL as string"""
 
-        url = 'https://{}/{}/{}/commit/{}'.format(
-            HOST_GITHUB,
-            self.repo,
-            self.application,
-            commit_sha
-        )
-        return url
+        return '{}/commit/{}'.format(self._url_github, commit_sha)
 
 
-    def get_comparison(self, start, end):
+    def _get_url_comparison(self, start, end):
         """Return github compare URL as string"""
 
-        return 'https://{}/{}/{}/compare/{}...{}'.format(
-            HOST_GITHUB, self.repo, self.application, start, end) + '\n'
+        return '{}/compare/{}...{}'.format(self._url_github, start, end)
 
 
     def _get_changelog(self, commit_sha):
         """"Parse and return CHANGELOG for latest tag as string"""
 
-        url = 'https://{}/{}/{}/{}/CHANGELOG'.format(
-            HOST_GITHUB_RAW, self.repo, self.application, commit_sha)
-
         for log_name in LOG_FILES:
             url = 'https://{}/{}/{}/{}/{}'.format(
-                HOST_GITHUB_RAW, self.repo,
-                self.application, commit_sha, log_name)
+                HOST_GITHUB_RAW,
+                self.repo,
+                self.application,
+                commit_sha,
+                log_name
+            )
             req = requests.get(url)
             try:
                 if 'Not Found' in req.text:
@@ -245,32 +216,35 @@ class GithubAPI(object):
         """Return bugzilla release notes with header as string"""
 
         notes = self.output.get_header('RELEASE NOTES')
-        notes += 'https://{}/{}/{}/releases'.format(
-            HOST_GITHUB, self.repo, self.application) + '\n'
+        notes += '{}/releases'.format(self._url_github) + '\n'
         return notes
 
 
     def _get_section_comparisons(self):
-        """Return github links to tag comparisons"""
+        """Return release notes - COMPARISONS section as string"""
 
         notes = self.output.get_sub_header('COMPARISONS')
         for i in xrange(0, self._max_comparisons - 1):
-            notes += self.get_comparison(self.latest_tags[i][VERS],
-                                         self.latest_tags[i + 1][VERS])
+            notes += self._get_url_comparison(self.latest_tags[i][VERS],
+                                         self.latest_tags[i + 1][VERS]) + '\n'
         return notes
 
 
     def _get_section_tags(self):
+        """Return release notes - TAGS section as string"""
+
         commit_sha = self._get_commit_sha()
         notes = self.output.get_sub_header('TAGS')
         notes += self._get_url_tag_release(
             self.latest_tags[self._max_comparisons - 1][VERS]) + '\n'
-        notes += self.get_url_tag_commit(commit_sha) + '\n'
+        notes += self._get_url_tag_commit(commit_sha) + '\n'
         notes += self._get_section_changelog(commit_sha)
         return notes
 
 
     def _get_section_changelog(self, commit_sha):
+        """Return release notes - CHANGELOG section as string"""
+
         changelog = self._get_changelog(commit_sha)
         if changelog:
             return self.output.get_sub_header('CHANGELOG') + changelog
@@ -279,7 +253,7 @@ class GithubAPI(object):
 
 
     def get_release_notes(self):
-        """Return release notes as string for Bugzilla deployment ticket."""
+        """Return release notes for Bugzilla deployment ticket as string"""
 
         notes = self._get_section_release_notes()
         notes += self._get_section_comparisons()
