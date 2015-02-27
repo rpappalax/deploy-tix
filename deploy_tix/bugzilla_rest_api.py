@@ -96,16 +96,19 @@ class BugzillaRESTAPI(object):
             json string to POST to REST API
         """
 
+        self.output.log('Posting bug to bugzilla API...', True)
         url = '{}/rest/bug?token={}'.format(self.host, self.token)
-        req = requests.post(url)
         data = self.get_json(
             release_num, product, environment, status, description)
-        print data
+
+        self.output.log(data)
 
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
         req = requests.post(url, data=json.dumps(data), headers=headers)
-        print 'CREATE BUG: {}'.format(req.status_code)
-        return req.text
+        new_bug_id = req.json()['id']
+
+        self.output.log('\nNew bug ID: {}\nDONE!\n\n'.format(new_bug_id))
+        return new_bug_id
 
 def main():
 

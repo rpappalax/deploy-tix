@@ -1,7 +1,9 @@
 
 import argparse
 from deploy_tix.bugzilla_rest_api import BugzillaRESTAPI
-from deploy_tix.github_api import GithubAPI
+from deploy_tix.release_notes import ReleaseNotes
+from output_helper import OutputHelper
+
 
 URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.com'
 URL_BUGZILLA_DEV = 'https://bugzilla-dev.allizom.org'
@@ -60,14 +62,16 @@ def main(args=None):
 
     status = 'NEW'
 
-    api = GithubAPI(repo, application, environment)
-    description = api.get_release_notes()
-    release_num = api.last_tag
+    output = OutputHelper()
+    output.log('Create deployment ticket', True, True)
+    notes = ReleaseNotes(repo, application, environment)
+    description = notes.get_release_notes()
+    release_num = notes.last_tag
 
     ticket = BugzillaRESTAPI(
         url_bugzilla, bugzilla_username, bugzilla_password)
 
-    print ticket.create_bug(
+    resp =  ticket.create_bug(
         release_num, application, environment, status, description)
 
 if __name__ == '__main__':

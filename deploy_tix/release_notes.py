@@ -9,6 +9,7 @@ import sys
 import requests
 import json
 import itertools
+import config
 from output_helper import OutputHelper
 
 
@@ -18,19 +19,19 @@ MAX_COMPARISONS_TO_SHOW = 4
 VERS = 0
 SHA = 1
 TYPE = 2
-LINE = '------------------'
-LOG_NAMES = ['CHANGES', 'CHANGELOG', 'ChangeLog']
+LINE = '------------------------------------'
+CHANGELOG_NAMES = ['CHANGES', 'CHANGELOG', 'ChangeLog']
 EXT = ['', '.rst', '.txt', '.RST', '.md']
 
-LOG_FILES = []
-[LOG_FILES.append(''.join(parts)) for parts in list(
-    itertools.product(*[LOG_NAMES, EXT]))]
+CHANGELOG_FILENAMES = []
+[CHANGELOG_FILENAMES.append(''.join(parts)) for parts in list(
+    itertools.product(*[CHANGELOG_NAMES, EXT]))]
 
 
 class NotFoundError(Exception):
     pass
 
-class GithubAPI(object):
+class ReleaseNotes(object):
     """Used for GET operations against github API."""
 
     def __init__(self, repo, application, environment):
@@ -46,8 +47,9 @@ class GithubAPI(object):
         self._url_github = self._get_url_github()
         self._url_github_raw = self._get_url_github_raw()
         self._url_github_api = self._get_url_github_api()
-
-        req = self._get_tags(self._url_github_api + '/refs/tags')
+        self._token_string = self._get_token_string()
+        url = '{}/refs/tags{}'.format(self._url_github_api, self._token_string)
+        req = self._get_tags(url)
         self._tags = req.json()
         self._max_comparisons = self._get_max_comparisons(self._tags)
         self._latest_tags = self._get_latest_tags()
@@ -62,6 +64,12 @@ class GithubAPI(object):
     def _get_last_tag(self):
         return self._latest_tags[self._max_comparisons - 1]
 
+    def _get_token_string(self):
+        if config.ACCESS_TOKEN:
+            return '?access_token={}'.format(config.ACCESS_TOKEN)
+        else:
+            return ''
+
 
     def _get_url_github_api(self):
         """Return github API URL as string"""
@@ -69,8 +77,10 @@ class GithubAPI(object):
         url = 'https://api.{}/repos/{}/{}/git'.format(
             HOST_GITHUB,
             self.repo,
-            self.application)
+            self.application
+            )
         return url
+
 
     def _get_url_github(self):
         """Return github root URL as string"""
@@ -133,18 +143,36 @@ class GithubAPI(object):
             object type] for last tags
         """
 
+        self.output.log('getting tags...', True)
+
         start = len(self._tags)  - self._max_comparisons
         tags = self._tags
-        latest = []
+        tags_unsorted = []
         for i in xrange(len(tags)):
-            if i >= start:
-                parts = tags[i]['ref'].split('/')
-                release_num = parts[2]
-                sha = tags[i]['object']['sha']
-                type = tags[i]['object']['type']
-                tag = [release_num, sha, type]
-                latest.append(tag)
 
+            parts = tags[i]['ref'].split('/')
+            release_num = parts[2]
+            sha = tags[i]['object']['sha']
+            type = tags[i]['object']['type']
+            url = tags[i]['object']['url'] + self._token_string
+            creation_date = self._get_commit_date(url)
+            tag = [release_num, sha, type, url, creation_date]
+            tags_unsorted.append(tag)
+            self.output.log((release_num, creation_date))
+
+        self.output.log('Sort tags by commit date', True)
+        tags_sorted = sorted(
+            tags_unsorted, key=lambda tags_sorted: tags_sorted[4])
+        self.output.log('done!')
+
+
+        latest = []
+        self.output.log('Get last tags from sorted list', True)
+        for i in xrange(len(tags_sorted)):
+            if i >= start:
+                latest.append(tags_sorted[i])
+                self.output.log(tags_sorted[i])
+        self.output.log(latest)
         return latest
 
 
@@ -157,18 +185,32 @@ class GithubAPI(object):
 
         last_tag = self._last_tag
         if last_tag[TYPE] == 'tag':
-            url = '{}/tags/{}'.format( self._url_github_api, last_tag[SHA])
+            url = '{}/tags/{}{}'.format(
+                self._url_github_api,
+                last_tag[SHA],
+                self._token_string)
+
             req = self._get_tags(url)
             return req.json()['object']['sha']
         else:
             return last_tag[SHA]
 
 
+    def _get_commit_date(self, url):
+        """Return tag or commit creation date as string."""
+
+        req = self._get_tags(url)
+        if 'git/tags' in url:
+            return req.json()['tagger']['date'].split('T')[0]
+        else:
+            return req.json()['committer']['date'].split('T')[0]
+
+
     def _get_changelog(self, commit_sha):
         """"Parse and return CHANGELOG for latest tag as string"""
 
-        for log_name in LOG_FILES:
-            url = '{}/{}/{}'.format(self._url_github_raw, commit_sha, log_name)
+        for filename in CHANGELOG_FILENAMES:
+            url = '{}/{}/{}'.format(self._url_github_raw, commit_sha, filename)
             req = requests.get(url)
             try:
                 if 'Not Found' in req.text:
@@ -182,15 +224,18 @@ class GithubAPI(object):
             return ''
 
         lines = req.text
-        first = self._latest_tags[self._max_comparisons - 1][VERS]
-        last = self._latest_tags[self._max_comparisons - 2][VERS]
+
+        # parse out release notes for this release only
+        vers_latest = self._latest_tags[self._max_comparisons - 1][VERS]
+        vers_previous = self._latest_tags[self._max_comparisons - 2][VERS]
+
         flag = False
 
         log = ''
         for line in lines.splitlines():
-            if first in line:
+            if vers_latest in line:
                 flag = True
-            if last in line:
+            if vers_previous in line:
                 flag = False
             if flag:
                 log += line + '\n'
@@ -202,7 +247,6 @@ class GithubAPI(object):
 
         notes = self.output.get_header('RELEASE NOTES')
         notes += '{}/releases'.format(self._url_github) + '\n'
-
         return notes
 
 
@@ -216,6 +260,7 @@ class GithubAPI(object):
             end = self._latest_tags[i + 1][VERS]
             notes += '{}/compare/{}...{}'.format(self._url_github, start, end) \
                      + '\n'
+        self.output.log('comparisons section - done!')
         return notes
 
 
@@ -231,6 +276,8 @@ class GithubAPI(object):
 
         notes += '{}/commit/{}'.format(self._url_github, commit_sha) + '\n'
         notes += self._get_section_changelog(commit_sha)
+        self.output.log('tags section - done!')
+
         return notes
 
 
@@ -238,6 +285,7 @@ class GithubAPI(object):
         """Return release notes - CHANGELOG section as string"""
 
         changelog = self._get_changelog(commit_sha)
+        self.output.log('changelog section - done!')
         if changelog:
             return self.output.get_sub_header('CHANGELOG') + changelog
         else:
@@ -247,6 +295,7 @@ class GithubAPI(object):
     def get_release_notes(self):
         """Return release notes for Bugzilla deployment ticket as string"""
 
+        self.output.log('Create release notes', True)
         notes = self._get_section_release_notes()
         notes += self._get_section_comparisons()
         notes += self._get_section_tags()
@@ -255,8 +304,7 @@ class GithubAPI(object):
 
 def main():
 
-    api = GithubAPI()
-    print api.get_release_notes()
+    notes = ReleaseNotes()
 
 
 if __name__ == '__main__':

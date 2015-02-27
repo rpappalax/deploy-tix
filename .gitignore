@@ -12,3 +12,4 @@ sdist/
 .installed.cfg
 *.egg
 docs/_build/
+/**/config.py

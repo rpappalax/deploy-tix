@@ -1,3 +1,4 @@
 from bugzilla_rest_api import BugzillaRESTAPI
-from github_api import GithubAPI
+from release_notes import ReleaseNotes
 from output_helper import OutputHelper
+import config

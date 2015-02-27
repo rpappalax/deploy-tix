@@ -2,6 +2,8 @@
 console output readability."""
 
 LINE = '------------------'
+LINE_LONG = '------------------------------------'
+LINE_DBL = '=================================================='
 NL = '\n'
 
 class OutputHelper(object):
@@ -10,9 +12,22 @@ class OutputHelper(object):
     def get_header(label):
         return '\n{}\n{}\n{}\n'.format(LINE, label, LINE)
 
+
     @staticmethod
     def get_sub_header(label):
         return '\n{}\n'.format(label)
+
+
+    @staticmethod
+    def log(msg, header=False, header_dbl=False):
+        """Log activity for console monitoring"""
+
+        if header:
+            line = LINE_DBL if header_dbl else LINE_LONG
+            print '\n{}\n{}\n{}\n'.format(line, msg, line)
+        else:
+            print '{}'.format(msg)
+
 
 if __name__ == '__main__':
 
