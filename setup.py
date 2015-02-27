@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='deploy-tix',
-    version='0.0.1',
+    version='0.0.2',
     description='Python scripts for creating / updating deployment tickets \
         in Bugzilla',
     author='Richard Pappalardo',

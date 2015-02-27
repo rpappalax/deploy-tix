@@ -55,6 +55,7 @@ def main(args=None):
     bugzilla_username = args['bugzilla_username']
     bugzilla_password = args['bugzilla_password']
     if args['bugzilla_prod']:
+        # REMOVE BEFORE MERGING
         exit()
         url_bugzilla = URL_BUGZILLA_PROD
     else:

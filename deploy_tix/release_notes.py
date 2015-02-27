@@ -7,25 +7,8 @@ Note:
 
 import sys
 import requests
-import json
-import itertools
-import config
 from output_helper import OutputHelper
-
-
-HOST_GITHUB = 'github.com'
-HOST_GITHUB_RAW = 'raw.githubusercontent.com'
-MAX_COMPARISONS_TO_SHOW = 4
-VERS = 0
-SHA = 1
-TYPE = 2
-LINE = '------------------------------------'
-CHANGELOG_NAMES = ['CHANGES', 'CHANGELOG', 'ChangeLog']
-EXT = ['', '.rst', '.txt', '.RST', '.md']
-
-CHANGELOG_FILENAMES = []
-[CHANGELOG_FILENAMES.append(''.join(parts)) for parts in list(
-    itertools.product(*[CHANGELOG_NAMES, EXT]))]
+from config import *
 
 
 class NotFoundError(Exception):
@@ -43,6 +26,7 @@ class ReleaseNotes(object):
             self.environment = environment.upper()
         else:
             exit('\nMissing github param\n\nABORTING!\n\n')
+
 
         self._url_github = self._get_url_github()
         self._url_github_raw = self._get_url_github_raw()
@@ -66,11 +50,12 @@ class ReleaseNotes(object):
 
         return self._latest_tags[self._max_comparisons - 1]
 
+
     def _get_token_string(self):
         """Return access_token as url param (if exists)"""
 
-        if config.ACCESS_TOKEN:
-            return '?access_token={}'.format(config.ACCESS_TOKEN)
+        if ACCESS_TOKEN:
+            return '?access_token={}'.format(ACCESS_TOKEN)
         return ''
 
 
@@ -287,7 +272,6 @@ class ReleaseNotes(object):
         notes += '{}/commit/{}'.format(self._url_github, commit_sha) + '\n'
         notes += self._get_section_changelog(commit_sha)
         self.output.log('tags section - DONE!')
-
         return notes
 
 

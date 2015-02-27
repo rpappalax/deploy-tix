@@ -19,11 +19,11 @@ class OutputHelper(object):
 
 
     @staticmethod
-    def log(msg, header=False, header_dbl=False):
+    def log(msg, has_header=False, has_header_dbl=False):
         """Log activity for console monitoring"""
 
-        if header:
-            line = LINE_DBL if header_dbl else LINE_LONG
+        if has_header:
+            line = LINE_DBL if has_header_dbl else LINE_LONG
             print '\n{}\n{}\n{}\n'.format(line, msg, line)
         else:
             print '{}'.format(msg)
