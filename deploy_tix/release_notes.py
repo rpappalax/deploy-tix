@@ -62,35 +62,36 @@ class ReleaseNotes(object):
 
 
     def _get_last_tag(self):
+        """Return last tag"""
+
         return self._latest_tags[self._max_comparisons - 1]
 
     def _get_token_string(self):
+        """Return access_token as url param (if exists)"""
+
         if config.ACCESS_TOKEN:
             return '?access_token={}'.format(config.ACCESS_TOKEN)
-        else:
-            return ''
+        return ''
 
 
     def _get_url_github_api(self):
         """Return github API URL as string"""
 
-        url = 'https://api.{}/repos/{}/{}/git'.format(
+        return 'https://api.{}/repos/{}/{}/git'.format(
             HOST_GITHUB,
             self.repo,
             self.application
             )
-        return url
 
 
     def _get_url_github(self):
         """Return github root URL as string"""
 
-        url = 'https://{}/{}/{}'.format(
+        return 'https://{}/{}/{}'.format(
             HOST_GITHUB,
             self.repo,
             self.application
         )
-        return url
 
 
     def _get_url_github_raw(self):
@@ -134,6 +135,23 @@ class ReleaseNotes(object):
             return req
 
 
+    def _parse_tag(self, tag):
+        """Parse a tag object for the data we want
+
+        Return:
+            list of desired elements
+        """
+
+        parts = tag['ref'].split('/')
+        release_num = parts[2]
+        sha = tag['object']['sha']
+        type = tag['object']['type']
+        url = tag['object']['url'] + self._token_string
+        creation_date = self._get_commit_date(url)
+        self.output.log((release_num, creation_date))
+        return [release_num, sha, type, url, creation_date]
+
+
     def _get_latest_tags(self):
         """Github API returns all tags indiscriminately, but
         we only want the latest.
@@ -143,28 +161,18 @@ class ReleaseNotes(object):
             object type] for last tags
         """
 
-        self.output.log('getting tags...', True)
-
-        start = len(self._tags)  - self._max_comparisons
+        self.output.log('Retrieve all tags', True)
+        start = len(self._tags) - self._max_comparisons
         tags = self._tags
         tags_unsorted = []
         for i in xrange(len(tags)):
-
-            parts = tags[i]['ref'].split('/')
-            release_num = parts[2]
-            sha = tags[i]['object']['sha']
-            type = tags[i]['object']['type']
-            url = tags[i]['object']['url'] + self._token_string
-            creation_date = self._get_commit_date(url)
-            tag = [release_num, sha, type, url, creation_date]
+            tag = self._parse_tag(tags[i])
             tags_unsorted.append(tag)
-            self.output.log((release_num, creation_date))
 
         self.output.log('Sort tags by commit date', True)
         tags_sorted = sorted(
             tags_unsorted, key=lambda tags_sorted: tags_sorted[4])
-        self.output.log('done!')
-
+        self.output.log('DONE!')
 
         latest = []
         self.output.log('Get last tags from sorted list', True)
@@ -226,6 +234,8 @@ class ReleaseNotes(object):
         lines = req.text
 
         # parse out release notes for this release only
+        # only works if version numbers in changelog appear exactly
+        # as they are tagged
         vers_latest = self._latest_tags[self._max_comparisons - 1][VERS]
         vers_previous = self._latest_tags[self._max_comparisons - 2][VERS]
 
@@ -260,7 +270,7 @@ class ReleaseNotes(object):
             end = self._latest_tags[i + 1][VERS]
             notes += '{}/compare/{}...{}'.format(self._url_github, start, end) \
                      + '\n'
-        self.output.log('comparisons section - done!')
+        self.output.log('comparisons section - DONE!')
         return notes
 
 
@@ -276,7 +286,7 @@ class ReleaseNotes(object):
 
         notes += '{}/commit/{}'.format(self._url_github, commit_sha) + '\n'
         notes += self._get_section_changelog(commit_sha)
-        self.output.log('tags section - done!')
+        self.output.log('tags section - DONE!')
 
         return notes
 
@@ -285,7 +295,7 @@ class ReleaseNotes(object):
         """Return release notes - CHANGELOG section as string"""
 
         changelog = self._get_changelog(commit_sha)
-        self.output.log('changelog section - done!')
+        self.output.log('changelog section - DONE!')
         if changelog:
             return self.output.get_sub_header('CHANGELOG') + changelog
         else:
