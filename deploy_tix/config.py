@@ -19,4 +19,7 @@ CHANGELOG_FILENAMES = []
 # unauthenticated: rate_limit = 60 requests / hour
 # authenticated: allows for 5000 requests / hour
 # Go to: github > Settings > Applications > Generate Access Token
-ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
+if os.environ['ACCESS_TOKEN']:
+    ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
+else:
+    ACCESS_TOKEN = ''

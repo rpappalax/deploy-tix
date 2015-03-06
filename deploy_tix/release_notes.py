@@ -28,11 +28,17 @@ class ReleaseNotes(object):
             exit('\nMissing github param\n\nABORTING!\n\n')
 
 
-        self._url_github = self._get_url_github()
-        self._url_github_raw = self._get_url_github_raw()
-        self._url_github_api = self._get_url_github_api()
-        self._token_string = self._get_token_string()
+        self._url_github = self._get_url_github(
+            HOST_GITHUB, repo, application)
+        self._url_github_api = self._get_url_github_api(
+            HOST_GITHUB, repo, application)
+        self._url_github_raw = self._get_url_github(
+            HOST_GITHUB_RAW, repo, application)
+
+        #################################
+        self._token_string = self._get_token_string(ACCESS_TOKEN)
         url = '{}/refs/tags{}'.format(self._url_github_api, self._token_string)
+
         req = self._get_tags(url)
         self._tags = req.json()
         self._max_comparisons = self._get_max_comparisons(self._tags)
@@ -51,39 +57,31 @@ class ReleaseNotes(object):
         return self._latest_tags[self._max_comparisons - 1]
 
 
-    def _get_token_string(self):
+    def _get_token_string(self, access_token):
         """Return access_token as url param (if exists)"""
 
-        if ACCESS_TOKEN:
-            return '?access_token={}'.format(ACCESS_TOKEN)
+        if access_token:
+            return '?access_token={}'.format(access_token)
         return ''
 
 
-    def _get_url_github_api(self):
-        """Return github API URL as string"""
-
-        return 'https://api.{}/repos/{}/{}/git'.format(
-            HOST_GITHUB,
-            self.repo,
-            self.application
-            )
-
-
-    def _get_url_github(self):
+    def _get_url_github(self, host_github, repo, application):
         """Return github root URL as string"""
 
         return 'https://{}/{}/{}'.format(
-            HOST_GITHUB,
-            self.repo,
-            self.application
+            host_github,
+            repo,
+            application
         )
 
 
-    def _get_url_github_raw(self):
-        return 'https://{}/{}/{}'.format(
-            HOST_GITHUB_RAW,
-            self.repo,
-            self.application
+    def _get_url_github_api(self, host_github, repo, application):
+        """Return github API URL as string"""
+
+        return 'https://api.{}/repos/{}/{}/git'.format(
+            host_github,
+            repo,
+            application
         )
 
 
@@ -142,8 +140,8 @@ class ReleaseNotes(object):
         we only want the latest.
 
         Return:
-            list of lists containing: [release_num, commit sha,
-            object type] for last tags
+            list of lists containing:
+        [release_num, sha, type, url, creation_date] for latest tags
         """
 
         self.output.log('Retrieve all tags', True)
