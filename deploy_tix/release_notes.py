@@ -14,6 +14,7 @@ from config import *
 class NotFoundError(Exception):
     pass
 
+
 class ReleaseNotes(object):
     """Used for GET operations against github API."""
 
@@ -27,17 +28,15 @@ class ReleaseNotes(object):
         else:
             exit('\nMissing github param\n\nABORTING!\n\n')
 
-
+        self._token_string = self._get_token_string(ACCESS_TOKEN)
         self._url_github = self._get_url_github(
             HOST_GITHUB, repo, application)
         self._url_github_api = self._get_url_github_api(
             HOST_GITHUB, repo, application)
         self._url_github_raw = self._get_url_github(
             HOST_GITHUB_RAW, repo, application)
-
-        #################################
-        self._token_string = self._get_token_string(ACCESS_TOKEN)
-        url = '{}/refs/tags{}'.format(self._url_github_api, self._token_string)
+        url = self._get_url_tags(
+            self._url_github_api, self._token_string)
 
         req = self._get_tags(url)
         self._tags = req.json()
@@ -50,12 +49,10 @@ class ReleaseNotes(object):
     def last_tag(self):
         return self._last_tag_version
 
-
     def _get_last_tag(self):
         """Return last tag"""
 
         return self._latest_tags[self._max_comparisons - 1]
-
 
     def _get_token_string(self, access_token):
         """Return access_token as url param (if exists)"""
@@ -63,7 +60,6 @@ class ReleaseNotes(object):
         if access_token:
             return '?access_token={}'.format(access_token)
         return ''
-
 
     def _get_url_github(self, host_github, repo, application):
         """Return github root URL as string"""
@@ -74,7 +70,6 @@ class ReleaseNotes(object):
             application
         )
 
-
     def _get_url_github_api(self, host_github, repo, application):
         """Return github API URL as string"""
 
@@ -84,6 +79,9 @@ class ReleaseNotes(object):
             application
         )
 
+    def _get_url_tags(self, url_github_api, token_string):
+
+        return '{}/refs/tags{}'.format(url_github_api, token_string)
 
     def _get_max_comparisons(self, tags):
         """Calculates max comparisons to show
@@ -101,7 +99,6 @@ class ReleaseNotes(object):
         else:
             return count
 
-
     def _get_tags(self, url):
         """Get all tags as json from Github API."""
 
@@ -116,7 +113,6 @@ class ReleaseNotes(object):
             sys.exit(err_msg)
         else:
             return req
-
 
     def _parse_tag(self, tag):
         """Parse a tag object for the data we want
@@ -133,7 +129,6 @@ class ReleaseNotes(object):
         creation_date = self._get_commit_date(url)
         self.output.log((release_num, creation_date))
         return [release_num, sha, type, url, creation_date]
-
 
     def _get_latest_tags(self):
         """Github API returns all tags indiscriminately, but
@@ -166,7 +161,6 @@ class ReleaseNotes(object):
         self.output.log(latest)
         return latest
 
-
     def _get_commit_sha(self):
         """Return tag commit sha as string.
 
@@ -186,7 +180,6 @@ class ReleaseNotes(object):
         else:
             return last_tag[SHA]
 
-
     def _get_commit_date(self, url):
         """Return tag or commit creation date as string."""
 
@@ -195,7 +188,6 @@ class ReleaseNotes(object):
             return req.json()['tagger']['date'].split('T')[0]
         else:
             return req.json()['committer']['date'].split('T')[0]
-
 
     def _get_changelog(self, commit_sha):
         """"Parse and return CHANGELOG for latest tag as string"""
@@ -211,7 +203,7 @@ class ReleaseNotes(object):
             else:
                 break
 
-        if req.text  == 'Not Found':
+        if req.text == 'Not Found':
             return ''
 
         lines = req.text
@@ -234,14 +226,12 @@ class ReleaseNotes(object):
                 log += line + '\n'
         return log
 
-
     def _get_section_release_notes(self):
         """Return bugzilla release notes with header as string"""
 
         notes = self.output.get_header('RELEASE NOTES')
         notes += '{}/releases'.format(self._url_github) + '\n'
         return notes
-
 
     def _get_section_comparisons(self):
         """Return release notes - COMPARISONS section as string"""
@@ -255,7 +245,6 @@ class ReleaseNotes(object):
                      + '\n'
         self.output.log('comparisons section - DONE!')
         return notes
-
 
     def _get_section_tags(self):
         """Return release notes - TAGS section as string"""
@@ -272,7 +261,6 @@ class ReleaseNotes(object):
         self.output.log('tags section - DONE!')
         return notes
 
-
     def _get_section_changelog(self, commit_sha):
         """Return release notes - CHANGELOG section as string"""
 
@@ -282,7 +270,6 @@ class ReleaseNotes(object):
             return self.output.get_sub_header('CHANGELOG') + changelog
         else:
             return ''
-
 
     def get_release_notes(self):
         """Return release notes for Bugzilla deployment ticket as string"""
@@ -296,7 +283,7 @@ class ReleaseNotes(object):
 
 def main():
 
-    notes = ReleaseNotes()
+    ReleaseNotes()
 
 
 if __name__ == '__main__':

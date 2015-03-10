@@ -11,12 +11,15 @@ import requests
 
 from output_helper import OutputHelper
 
-URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.com'
+URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.org'
 URL_BUGZILLA_DEV = 'https://bugzilla-dev.allizom.org'
-# LINE = '------------------'
+COMPONENT_PROD = 'Operations: Deployment Requests'
+COMPONENT_DEV = 'General'
+
 
 class InvalidCredentials(Exception):
     pass
+
 
 class BugzillaRESTAPI(object):
     """"Used for CRUD operations against Bugzilla REST API"""
@@ -29,6 +32,18 @@ class BugzillaRESTAPI(object):
         self.password = bugzilla_password
         self.token = self.get_token(host)
 
+    def get_component(self, host):
+        """Return Bugzilla component as string
+
+        Note:
+            bugzilla-dev doesn't mirror the same components, so
+            use 'General'
+        """
+
+        if 'dev' in host:
+            return COMPONENT_DEV
+        else:
+            return COMPONENT_PROD
 
     def get_json(self, release_num, product, environment, status, description):
         """Create bugzilla JSON to POST to REST API.
@@ -37,21 +52,24 @@ class BugzillaRESTAPI(object):
             JSON string
         """
 
+        component = self.get_component(self.host)
         data = {
-            'product':'Mozilla Services',
-            'component':'General',
-            'version':'unspecified',
-            'op_sys':'All',
-            'rep_platform':'All'
+            'product': 'Mozilla Services',
+            'component': 'General',
+            'component': component,
+            'version': 'unspecified',
+            'op_sys': 'All',
+            'rep_platform': 'All'
         }
         short_desc = 'Please deploy {} {} to {}'.format(
             release_num, product, environment)
         data.update(
-            {'short_desc': short_desc,
-             'description': description, 'status': status}
+            {
+                'short_desc': short_desc,
+                'description': description, 'status': status
+            }
         )
         return data
-
 
     def get_token(self, host):
         """Fetch and return bugzilla token.
@@ -71,14 +89,14 @@ class BugzillaRESTAPI(object):
             err_header = self.output.get_header('BUGZILLA ERROR')
 
             err_msg = '{}\n{}\n{}\n\n'.format(
-            err_header,
-            decoded['message'],
-            decoded['documentation'])
+                err_header,
+                decoded['message'],
+                decoded['documentation']
+            )
 
             sys.exit(err_msg)
         else:
             return decoded['token']
-
 
     def create_bug(
             self, release_num, product, environment, status, description):
@@ -110,6 +128,7 @@ class BugzillaRESTAPI(object):
         self.output.log('\nNew bug ID: {}\nDONE!\n\n'.format(new_bug_id))
         return new_bug_id
 
+
 def main():
 
     bugzilla_username = 'johnnyquest@racebannon.com'
@@ -130,6 +149,3 @@ def main():
 if __name__ == '__main__':
 
     main()
-
-
-

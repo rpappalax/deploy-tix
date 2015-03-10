@@ -10,4 +10,4 @@ sdist/
 *.egg-info/
 .installed.cfg
 *.egg
-docs/_build/
+deploy_tix/tests/

@@ -25,4 +25,34 @@ Instead, create an access token from your github home page.  Go to:
  - Build and run:
  - `$ make build`
  - `$ source ./build/venv/bin/activate`
- - `$ ticket -h`
+
+
+## Options
+ ```bash
+ (venv)$ ticket -h
+ usage: ticket [-h] [-r REPO] -a APPLICATION [-e ENVIRONMENT] -u
+               BUGZILLA_USERNAME -p BUGZILLA_PASSWORD [-z]
+
+ Scripts for creating / updating deployment tickets in Bugzilla
+
+ optional arguments:
+   -h, --help            show this help message and exit
+   -r REPO, --repo REPO  Example: mozilla-services (default: mozilla-services)
+   -a APPLICATION, --application APPLICATION
+                         Example: loop-server (default: None)
+   -e ENVIRONMENT, --environment ENVIRONMENT
+                         Enter: STAGE, PROD (default: STAGE)
+   -u BUGZILLA_USERNAME, --bugzilla-username BUGZILLA_USERNAME
+   -p BUGZILLA_PASSWORD, --bugzilla-password BUGZILLA_PASSWORD
+   -z, --bugzilla-prod   Add this option, and you'll post to bugzilla prod
+                         (default: False)
+
+ ```
+
+## Example
+  - Post to bugzilla-dev
+    `$ ticket -h -r mozilla-services -a loop-server -e STAGE -u johnny@quest.com -p password123`
+
+  - Post to bugzilla (add -z option)
+    `$ ticket -h -r mozilla-services -a loop-server -e STAGE -u johnny@quest.com -p password123 -z`
+

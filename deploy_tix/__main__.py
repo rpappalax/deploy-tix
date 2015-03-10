@@ -5,7 +5,7 @@ from deploy_tix.release_notes import ReleaseNotes
 from output_helper import OutputHelper
 
 
-URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.com'
+URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.org'
 URL_BUGZILLA_DEV = 'https://bugzilla-dev.allizom.org'
 
 
@@ -72,7 +72,7 @@ def main(args=None):
     ticket = BugzillaRESTAPI(
         url_bugzilla, bugzilla_username, bugzilla_password)
 
-    resp =  ticket.create_bug(
+    ticket.create_bug(
         release_num, application, environment, status, description)
 
 if __name__ == '__main__':
