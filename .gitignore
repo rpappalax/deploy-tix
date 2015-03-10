@@ -8,6 +8,3 @@ build/
 dist/
 sdist/
 *.egg-info/
-.installed.cfg
-*.egg
-deploy_tix/tests/

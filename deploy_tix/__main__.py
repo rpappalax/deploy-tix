@@ -17,13 +17,13 @@ def main(args=None):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
-        '-r', '--repo',
+        '-o', '--repo-owner',
         help='Example: mozilla-services',
         default='mozilla-services',
         required=False)
 
     parser.add_argument(
-        '-a', '--application',
+        '-r', '--repo',
         help='Example: loop-server',
         required=True)
 
@@ -49,8 +49,8 @@ def main(args=None):
 
     args = vars(parser.parse_args())
 
+    repo_owner = args['repo_owner']
     repo = args['repo']
-    application = args['application']
     environment = args['environment']
     bugzilla_username = args['bugzilla_username']
     bugzilla_password = args['bugzilla_password']
@@ -65,7 +65,7 @@ def main(args=None):
 
     output = OutputHelper()
     output.log('Create deployment ticket', True, True)
-    notes = ReleaseNotes(repo, application, environment)
+    notes = ReleaseNotes(repo_owner, repo, environment)
     description = notes.get_release_notes()
     release_num = notes.last_tag
 
@@ -73,7 +73,7 @@ def main(args=None):
         url_bugzilla, bugzilla_username, bugzilla_password)
 
     ticket.create_bug(
-        release_num, application, environment, status, description)
+        release_num, repo, environment, status, description)
 
 if __name__ == '__main__':
     main()

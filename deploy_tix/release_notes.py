@@ -18,23 +18,23 @@ class NotFoundError(Exception):
 class ReleaseNotes(object):
     """Used for GET operations against github API."""
 
-    def __init__(self, repo, application, environment):
+    def __init__(self, repo_owner, repo, environment):
 
         self.output = OutputHelper()
-        if all([repo, application, environment]):
+        if all([repo_owner, repo, environment]):
+            self.repo_owner = repo_owner
             self.repo = repo
-            self.application = application
             self.environment = environment.upper()
         else:
             exit('\nMissing github param\n\nABORTING!\n\n')
 
         self._token_string = self._get_token_string(ACCESS_TOKEN)
         self._url_github = self._get_url_github(
-            HOST_GITHUB, repo, application)
+            HOST_GITHUB, repo_owner, repo)
         self._url_github_api = self._get_url_github_api(
-            HOST_GITHUB, repo, application)
+            HOST_GITHUB, repo_owner, repo)
         self._url_github_raw = self._get_url_github(
-            HOST_GITHUB_RAW, repo, application)
+            HOST_GITHUB_RAW, repo_owner, repo)
         url = self._get_url_tags(
             self._url_github_api, self._token_string)
 
@@ -61,22 +61,22 @@ class ReleaseNotes(object):
             return '?access_token={}'.format(access_token)
         return ''
 
-    def _get_url_github(self, host_github, repo, application):
+    def _get_url_github(self, host_github, repo_owner, repo):
         """Return github root URL as string"""
 
         return 'https://{}/{}/{}'.format(
             host_github,
-            repo,
-            application
+            repo_owner,
+            repo
         )
 
-    def _get_url_github_api(self, host_github, repo, application):
+    def _get_url_github_api(self, host_github, repo_owner, repo):
         """Return github API URL as string"""
 
         return 'https://api.{}/repos/{}/{}/git'.format(
             host_github,
-            repo,
-            application
+            repo_owner,
+            repo
         )
 
     def _get_url_tags(self, url_github_api, token_string):

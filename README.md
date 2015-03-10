@@ -28,25 +28,24 @@ Instead, create an access token from your github home page.  Go to:
 
 
 ## Options
- ```bash
- (venv)$ ticket -h
- usage: ticket [-h] [-r REPO] -a APPLICATION [-e ENVIRONMENT] -u
-               BUGZILLA_USERNAME -p BUGZILLA_PASSWORD [-z]
+ ```sh
+(venv)$ ticket -h
+usage: ticket [-h] [-o REPO_OWNER] -r REPO [-e ENVIRONMENT] -u
+              BUGZILLA_USERNAME -p BUGZILLA_PASSWORD [-z]
 
- Scripts for creating / updating deployment tickets in Bugzilla
+Scripts for creating / updating deployment tickets in Bugzilla
 
- optional arguments:
-   -h, --help            show this help message and exit
-   -r REPO, --repo REPO  Example: mozilla-services (default: mozilla-services)
-   -a APPLICATION, --application APPLICATION
-                         Example: loop-server (default: None)
-   -e ENVIRONMENT, --environment ENVIRONMENT
-                         Enter: STAGE, PROD (default: STAGE)
-   -u BUGZILLA_USERNAME, --bugzilla-username BUGZILLA_USERNAME
-   -p BUGZILLA_PASSWORD, --bugzilla-password BUGZILLA_PASSWORD
-   -z, --bugzilla-prod   Add this option, and you'll post to bugzilla prod
-                         (default: False)
-
+optional arguments:
+  -h, --help            show this help message and exit
+  -o REPO_OWNER, --repo-owner REPO_OWNER
+                        Example: mozilla-services (default: mozilla-services)
+  -r REPO, --repo REPO  Example: loop-server (default: None)
+  -e ENVIRONMENT, --environment ENVIRONMENT
+                        Enter: STAGE, PROD (default: STAGE)
+  -u BUGZILLA_USERNAME, --bugzilla-username BUGZILLA_USERNAME
+  -p BUGZILLA_PASSWORD, --bugzilla-password BUGZILLA_PASSWORD
+  -z, --bugzilla-prod   Add this option, and you'll post to bugzilla prod
+                        (default: False)
  ```
 
 ## Example
