@@ -15,7 +15,7 @@ class OutputHelper(object):
 
     @staticmethod
     def get_sub_header(label):
-        return '\n{}\n'.format(label)
+        return '\n{0}\n'.format(label)
 
     @staticmethod
     def log(msg, has_header=False, has_header_dbl=False):
