@@ -23,9 +23,9 @@ class OutputHelper(object):
 
         if has_header:
             line = LINE_DBL if has_header_dbl else LINE_LONG
-            print('\n{}\n{}\n{}\n'.format(line, msg, line))
+            print('\n{0}\n{1}\n{2}\n'.format(line, msg, line))
         else:
-            print('{}'.format(msg))
+            print('{0}'.format(msg))
 
 
 if __name__ == '__main__':
