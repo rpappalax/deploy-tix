@@ -1,14 +1,37 @@
 """Module for constructing service deployment release notes using github api
 
-Note:
-    Github tags API only deals with tag objects - so
-    only annotated tags, not lightweight tags.
+Notes:
+[1]  Github tags API only deals with tag objects - so only annotated tags, not
+     lightweight tags.
+[2] set an ACCESS_TOKEN or you'll be restricted to 60 reqs/hour (vs. 5000)
+
 """
 
+import os
 import sys
+import itertools
 import requests
-from output_helper import OutputHelper
-from config import *
+from deploy_tix.output_helper import OutputHelper
+
+
+HOST_GITHUB = 'github.com'
+HOST_GITHUB_RAW = 'raw.githubusercontent.com'
+MAX_COMPARISONS_TO_SHOW = 4
+VERS = 0
+SHA = 1
+TYPE = 2
+LINE = '------------------------------------'
+CHANGELOG_NAMES = ['CHANGES', 'CHANGELOG', 'ChangeLog']
+EXT = ['', '.rst', '.txt', '.RST', '.md']
+
+CHANGELOG_FILENAMES = []
+[CHANGELOG_FILENAMES.append(''.join(parts)) for parts in list(
+    itertools.product(*[CHANGELOG_NAMES, EXT]))]
+
+if os.environ['ACCESS_TOKEN']:
+    ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
+else:
+    ACCESS_TOKEN = ''
 
 
 class NotFoundError(Exception):
@@ -37,7 +60,6 @@ class ReleaseNotes(object):
             HOST_GITHUB_RAW, repo_owner, repo)
         url = self._get_url_tags(
             self._url_github_api, self._token_string)
-
         req = self._get_tags(url)
         self._tags = req.json()
         self._max_comparisons = self._get_max_comparisons(self._tags)

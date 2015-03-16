@@ -3,8 +3,12 @@
 *.sw[op]
 *.py[cod]
 .Python
+
 env/
 build/
 dist/
 sdist/
 *.egg-info/
+.noseids
+.tox/
+

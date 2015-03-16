@@ -23,13 +23,13 @@ class OutputHelper(object):
 
         if has_header:
             line = LINE_DBL if has_header_dbl else LINE_LONG
-            print '\n{}\n{}\n{}\n'.format(line, msg, line)
+            print('\n{}\n{}\n{}\n'.format(line, msg, line))
         else:
-            print '{}'.format(msg)
+            print('{}'.format(msg))
 
 
 if __name__ == '__main__':
 
     out = OutputHelper()
-    print out.get_header('YOUR HEADER')
-    print out.get_sub_header('MY_SUB_HEADER')
+    print(out.get_header('YOUR HEADER'))
+    print(out.get_sub_header('MY_SUB_HEADER'))

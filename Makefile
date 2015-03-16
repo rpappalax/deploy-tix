@@ -47,6 +47,8 @@ clean:
 	rm -rf build
 	rm -rf *egg*
 	rm -rf dist
+	rm -rf .tox
+	find . -name "*.pyc" -exec rm -rf {} \;
 
 
 # for dev branch only
