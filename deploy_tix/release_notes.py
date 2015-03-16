@@ -80,13 +80,13 @@ class ReleaseNotes(object):
         """Return access_token as url param (if exists)"""
 
         if access_token:
-            return '?access_token={}'.format(access_token)
+            return '?access_token={0}'.format(access_token)
         return ''
 
     def _get_url_github(self, host_github, repo_owner, repo):
         """Return github root URL as string"""
 
-        return 'https://{}/{}/{}'.format(
+        return 'https://{0}/{1}/{2}'.format(
             host_github,
             repo_owner,
             repo
@@ -95,7 +95,7 @@ class ReleaseNotes(object):
     def _get_url_github_api(self, host_github, repo_owner, repo):
         """Return github API URL as string"""
 
-        return 'https://api.{}/repos/{}/{}/git'.format(
+        return 'https://api.{0}/repos/{1}/{2}/git'.format(
             host_github,
             repo_owner,
             repo
@@ -103,7 +103,7 @@ class ReleaseNotes(object):
 
     def _get_url_tags(self, url_github_api, token_string):
 
-        return '{}/refs/tags{}'.format(url_github_api, token_string)
+        return '{0}/refs/tags{1}'.format(url_github_api, token_string)
 
     def _get_max_comparisons(self, tags):
         """Calculates max comparisons to show
@@ -130,7 +130,7 @@ class ReleaseNotes(object):
                 raise NotFoundError
         except NotFoundError:
             err_header = self.output.get_header('ERROR')
-            err_msg = '{}\nNothing found at: \n{}\nABORTING!\n\n'.format(
+            err_msg = '{0}\nNothing found at: \n{1}\nABORTING!\n\n'.format(
                 err_header, url)
             sys.exit(err_msg)
         else:
@@ -192,7 +192,7 @@ class ReleaseNotes(object):
 
         last_tag = self._last_tag
         if last_tag[TYPE] == 'tag':
-            url = '{}/tags/{}{}'.format(
+            url = '{0}/tags/{1}{2}'.format(
                 self._url_github_api,
                 last_tag[SHA],
                 self._token_string)
@@ -215,7 +215,7 @@ class ReleaseNotes(object):
         """"Parse and return CHANGELOG for latest tag as string"""
 
         for filename in CHANGELOG_FILENAMES:
-            url = '{}/{}/{}'.format(self._url_github_raw, commit_sha, filename)
+            url = '{0}/{1}/{2}'.format(self._url_github_raw, commit_sha, filename)
             req = requests.get(url)
             try:
                 if 'Not Found' in req.text:
@@ -252,7 +252,7 @@ class ReleaseNotes(object):
         """Return bugzilla release notes with header as string"""
 
         notes = self.output.get_header('RELEASE NOTES')
-        notes += '{}/releases'.format(self._url_github) + '\n'
+        notes += '{0}/releases'.format(self._url_github) + '\n'
         return notes
 
     def _get_section_comparisons(self):
@@ -263,7 +263,7 @@ class ReleaseNotes(object):
         for i in xrange(0, self._max_comparisons - 1):
             start = self._latest_tags[i][VERS]
             end = self._latest_tags[i + 1][VERS]
-            notes += '{}/compare/{}...{}'.format(self._url_github, start, end) \
+            notes += '{0}/compare/{1}...{2}'.format(self._url_github, start, end) \
                      + '\n'
         self.output.log('comparisons section - DONE!')
         return notes
@@ -274,11 +274,11 @@ class ReleaseNotes(object):
         commit_sha = self._get_commit_sha()
         notes = self.output.get_sub_header('TAGS')
 
-        notes += '{}/releases/tag/{}'.format(
+        notes += '{0}/releases/tag/{1}'.format(
             self._url_github,
             self._latest_tags[self._max_comparisons - 1][VERS]) + '\n'
 
-        notes += '{}/commit/{}'.format(self._url_github, commit_sha) + '\n'
+        notes += '{0}/commit/{1}'.format(self._url_github, commit_sha) + '\n'
         notes += self._get_section_changelog(commit_sha)
         self.output.log('tags section - DONE!')
         return notes
