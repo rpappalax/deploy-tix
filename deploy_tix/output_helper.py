@@ -11,7 +11,7 @@ class OutputHelper(object):
 
     @staticmethod
     def get_header(label):
-        return '\n{}\n{}\n{}\n'.format(LINE, label, LINE)
+        return '\n{0}\n{1}\n{2}\n'.format(LINE, label, LINE)
 
     @staticmethod
     def get_sub_header(label):
