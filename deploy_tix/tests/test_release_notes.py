@@ -24,7 +24,7 @@ def fake_urlopen(url, local_path):
     """
     parsed_url = urlparse(url)
     # resource_file = os.path.normpath('tests/resources%s' % parsed_url.path)
-    path_new = '{}{}'.format(local_path, parsed_url.path)
+    path_new = '{0}{1}'.format(local_path, parsed_url.path)
     resource_file = os.path.normpath(path_new)
     # Must return a file-like object
     return open(resource_file, mode='rb')
@@ -128,12 +128,12 @@ class ReleaseNotesTestCase(unittest.TestCase):
 
         assert len(responses.calls) == 1
         print '================='
-        print 'response.callslen: {}'.format(len(responses.calls))
+        print 'response.callslen: {0}'.format(len(responses.calls))
         assert responses.calls[0].request.url == path
         print '================='
         assert responses.calls[0].response.text == mock_data
-        print 'responses.calls[0].request.url: {}'.format(responses.calls[0].request.url)
-        print 'responses.calls[0].response.text: {}'.format(responses.calls[0].response.text)
+        print 'responses.calls[0].request.url: {0}'.format(responses.calls[0].request.url)
+        print 'responses.calls[0].response.text: {0}'.format(responses.calls[0].response.text)
         print '================='
         assert(False)
 
