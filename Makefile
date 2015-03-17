@@ -28,16 +28,7 @@ build: $(VENVDIR)/COMPLETE
 $(VENVDIR)/COMPLETE: requirements.txt
 	mkdir -p build
 	virtualenv --no-site-packages --python=`which python` --distribute $(VENVDIR)
-	$(INSTALL) -r ./requirements.txt
-	$(PYTHON) ./setup.py develop
-	touch $(VENVDIR)/COMPLETE
-
-.PHONY: build-jenkins
-build-jenkins: $(VENVDIR)/COMPLETE
-$(VENVDIR)/COMPLETE: requirements.txt
-	mkdir -p build
-	virtualenv --no-site-packages --python='/usr/bin/python2.7' --distribute $(VENVDIR)
-	#virtualenv --no-site-packages --python='/usr/local/bin/python3.4' --distribute $(VENVDIR)
+	# virtualenv --no-site-packages --python='/usr/bin/python2.6' --distribute $(VENVDIR)
 	$(INSTALL) -r ./requirements.txt
 	$(PYTHON) ./setup.py develop
 	touch $(VENVDIR)/COMPLETE

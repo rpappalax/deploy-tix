@@ -61,7 +61,7 @@ class BugzillaRESTAPI(object):
             'op_sys': 'All',
             'rep_platform': 'All'
         }
-        short_desc = 'Please deploy {} {} to {}'.format(
+        short_desc = 'Please deploy {0} {1} to {2}'.format(
             release_num, product, environment)
         data.update(
             {
@@ -78,7 +78,7 @@ class BugzillaRESTAPI(object):
             string token
         """
 
-        url = '{}/rest/login?login={}&password={}'.format(
+        url = '{0}/rest/login?login={1}&password={2}'.format(
             host, self.username, self.password)
         req = requests.get(url)
         decoded = json.loads(req.text)
@@ -88,7 +88,7 @@ class BugzillaRESTAPI(object):
         except InvalidCredentials:
             err_header = self.output.get_header('BUGZILLA ERROR')
 
-            err_msg = '{}\n{}\n{}\n\n'.format(
+            err_msg = '{0}\n{1}\n{2}\n\n'.format(
                 err_header,
                 decoded['message'],
                 decoded['documentation']
@@ -115,7 +115,7 @@ class BugzillaRESTAPI(object):
         """
 
         self.output.log('Posting bug to bugzilla API...', True)
-        url = '{}/rest/bug?token={}'.format(self.host, self.token)
+        url = '{0}/rest/bug?token={1}'.format(self.host, self.token)
         data = self.get_json(
             release_num, product, environment, status, description)
 
@@ -125,7 +125,7 @@ class BugzillaRESTAPI(object):
         req = requests.post(url, data=json.dumps(data), headers=headers)
         new_bug_id = req.json()['id']
 
-        self.output.log('\nNew bug ID: {}\nDONE!\n\n'.format(new_bug_id))
+        self.output.log('\nNew bug ID: {0}\nDONE!\n\n'.format(new_bug_id))
         return new_bug_id
 
 

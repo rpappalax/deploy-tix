@@ -11,11 +11,11 @@ class OutputHelper(object):
 
     @staticmethod
     def get_header(label):
-        return '\n{}\n{}\n{}\n'.format(LINE, label, LINE)
+        return '\n{0}\n{1}\n{2}\n'.format(LINE, label, LINE)
 
     @staticmethod
     def get_sub_header(label):
-        return '\n{}\n'.format(label)
+        return '\n{0}\n'.format(label)
 
     @staticmethod
     def log(msg, has_header=False, has_header_dbl=False):
@@ -23,9 +23,9 @@ class OutputHelper(object):
 
         if has_header:
             line = LINE_DBL if has_header_dbl else LINE_LONG
-            print('\n{}\n{}\n{}\n'.format(line, msg, line))
+            print('\n{0}\n{1}\n{2}\n'.format(line, msg, line))
         else:
-            print('{}'.format(msg))
+            print('{0}'.format(msg))
 
 
 if __name__ == '__main__':
