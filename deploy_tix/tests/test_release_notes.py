@@ -1,5 +1,6 @@
 import os
 import unittest
+import json
 import mock
 import requests
 import responses
@@ -15,18 +16,43 @@ MOCK_REPO = 'shavar'
 MOCK_ENV = 'STAGE'
 ACCESS_TOKEN = 'xxxxxxxxxx'
 
+def response_mock(path_local):
+    with open(path_local) as f:
+        mock_data = f.read()
+    return mock_data
 
-def fake_urlopen(url, local_path):
-    """
-    A stub urlopen() implementation that load json responses from
-    the filesystem.
-    """
-    parsed_url = urlparse(url)
-    # resource_file = os.path.normpath('tests/resources%s' % parsed_url.path)
-    path_new = '{0}{1}'.format(local_path, parsed_url.path)
-    resource_file = os.path.normpath(path_new)
-    # Must return a file-like object
-    return open(resource_file, mode='rb')
+@responses.activate
+def test_get_tags(url, path_local):
+
+    url = 'https://api.github.com/repos/mozilla-services/shavar/git/refs/tags'
+    url_parsed = urlparse(url)
+
+    path_remote = '{0}://{1}{2}'.format(
+        url_parsed.scheme,
+        url_parsed.netloc,
+        url_parsed.path
+    )
+    path_local = '{0}/{1}{2}'.format(
+        'deploy_tix/tests/mocks',
+        url_parsed.netloc,
+        url_parsed.path
+    )
+
+    mock_data = response_mock(path_local)
+
+    responses.add(responses.GET,
+                  path_remote,
+                  body=mock_data,
+                  status=200,
+                  content_type='application/json')
+    resp = requests.get(path_remote)
+
+    assert len(responses.calls) == 1
+    assert responses.calls[0].request.url == path_remote
+    assert resp.json() == json.loads(mock_data)
+    assert responses.calls[0].response.text == mock_data
+
+
 
 class ReleaseNotesTestCase(unittest.TestCase):
     """Tests for `release_notes.py`."""
@@ -104,38 +130,11 @@ class ReleaseNotesTestCase(unittest.TestCase):
             result = self.mock_rel_notes._get_max_comparisons(tags)
             self.assertTrue(result == len(tags), failure_msg)
 
-    @responses.activate
-    def test_get_tags(self):
 
-        domain = 'https://api.github.com'
-        dir_local = 'deploy_tix/tests/mocks/api.github.com'
-        path = 'repos/mozilla-services/shavar/git/tags'
-        path_local = ''
-        path_local = path_local +'deploy_tix/tests/mocks/api.github.com/repos/mozilla-services/shavar/git/refs/tags'
-
-        with open(path_local) as f:
-            mock_data = f.read()
-
-        path = os.path.join(domain, path)
-        responses.add(responses.GET, path,
-                      body=mock_data, status=200,
-                      content_type='application/json')
-        resp = requests.get(path)
-        assert resp.status_code == 200
-        # if <Response [200]>, the mock fixture is working
-        print resp
-
-        assert len(responses.calls) == 1
-        print '================='
-        print 'response.callslen: {0}'.format(len(responses.calls))
-        assert responses.calls[0].request.url == path
-        print '================='
-        assert responses.calls[0].response.text == mock_data
-        print 'responses.calls[0].request.url: {0}'.format(responses.calls[0].request.url)
-        print 'responses.calls[0].response.text: {0}'.format(responses.calls[0].response.text)
-        print '================='
-        assert(False)
-
+    # def test_get_tags(self):
+    #
+    #     pass
+    #
     # def test_parse_tag(self):
     #
     #     pass
