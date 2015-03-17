@@ -5,7 +5,7 @@ Python scripts to generate Bugzilla deployment tickets for Mozilla Services.
 
 Still under heavy development. FOR OPS USE AND DEMO ONLY.
 
-.. image:: https://travis-ci.org/rpappalax/deploy-tix.svg?branch=dev
+.. image:: https://travis-ci.org/rpappalax/deploy-tix.svg?branch=dev-rpapa
     :target: https://travis-ci.org/rpappalax/deploy-tix
 
 Projects
