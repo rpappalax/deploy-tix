@@ -34,7 +34,9 @@ Instead, create an access token from your github home page.  Go to:
 
 Options
 -----------
- ```sh
+
+.. code:: bash
+
 (venv)$ ticket -h
 usage: ticket [-h] [-o REPO_OWNER] -r REPO [-e ENVIRONMENT] -u
               BUGZILLA_USERNAME -p BUGZILLA_PASSWORD [-z]
@@ -52,7 +54,7 @@ optional arguments:
   -p BUGZILLA_PASSWORD, --bugzilla-password BUGZILLA_PASSWORD
   -z, --bugzilla-prod   Add this option, and you'll post to bugzilla prod
                         (default: False)
- ```
+
 
 Example
 ----------------
