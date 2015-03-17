@@ -8,14 +8,16 @@ Still under heavy development. FOR OPS USE AND DEMO ONLY.
 .. image:: https://travis-ci.org/rpappalax/deploy-tix.svg?branch=dev
     :target: https://travis-ci.org/rpappalax/deploy-tix
 
-## Projects
- * loop-server
- * loop-client
- * msisdn-gateway
- * shavar
- * pushgo
+Projects
+-----------
+ - loop-server
+ - loop-client
+ - msisdn-gateway
+ - shavar
+ - pushgo
 
-## Setup
+Setup
+-----------
 deploy-tix will make multiple calls to github API.
 You're allowed up to 60 calls / hour without authentication, but you'll soon
 run out!
@@ -30,7 +32,8 @@ Instead, create an access token from your github home page.  Go to:
  - `$ source ./build/venv/bin/activate`
 
 
-## Options
+Options
+-----------
  ```sh
 (venv)$ ticket -h
 usage: ticket [-h] [-o REPO_OWNER] -r REPO [-e ENVIRONMENT] -u
@@ -51,7 +54,9 @@ optional arguments:
                         (default: False)
  ```
 
-## Example
+Example
+----------------
+
   - Post to bugzilla-dev
     `$ ticket -h -r mozilla-services -a loop-server -e STAGE -u johnny@quest.com -p password123`
 
