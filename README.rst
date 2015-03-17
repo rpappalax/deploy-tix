@@ -31,6 +31,7 @@ Instead, create an access token from your github home page.  Go to:
 
    $ export ACCESS_TOKEN=<your_access_token_here>
 
+
  - Build and run:
 
 .. code:: bash
@@ -53,24 +54,24 @@ Usage: ticket [args..] [options]
   -o REPO_OWNER, --repo-owner REPO_OWNER
                         Example: mozilla-services (default: mozilla-services)
   -r REPO, --repo REPO  Example: loop-server (default: None)
-  -e ENVIRONMENT, --environment ENVIRONMENT
-                        Enter: STAGE, PROD (default: STAGE)
+  -e ENVIRONMENT, --environment ENVIRONMENT Example: STAGE, PROD (default: STAGE)
   -u BUGZILLA_USERNAME, --bugzilla-username BUGZILLA_USERNAME (default: None)
   -p BUGZILLA_PASSWORD, --bugzilla-password BUGZILLA_PASSWORD (default: None)
-  -z, --bugzilla-prod   Add this option, and you'll post to bugzilla prod
-                        (default: False)
+  -z, --bugzilla-prod   Add this option, and you'll post to bugzilla prod \
+   (default: False)
 
 
 Example
 ----------------
 
-  - Post to bugzilla-dev
+ - Post to bugzilla-dev
 
 .. code:: bash
 
     $ ticket -h -r mozilla-services -a loop-server -e STAGE -u johnny@quest.com -p password123
 
-  - Post to bugzilla (add -z option)
+
+ - Post to bugzilla (add -z option)
 
 .. code:: bash
 
