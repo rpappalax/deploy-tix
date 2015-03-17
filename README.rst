@@ -35,15 +35,13 @@ Instead, create an access token from your github home page.  Go to:
 Options
 -----------
 
-.. code:: bash
-
-(venv)$ ticket -h
-usage: ticket [-h] [-o REPO_OWNER] -r REPO [-e ENVIRONMENT] -u
-              BUGZILLA_USERNAME -p BUGZILLA_PASSWORD [-z]
-
 Scripts for creating / updating deployment tickets in Bugzilla
 
-optional arguments:
+.. code:: bash
+
+(venv)$ ticket
+Usage: ticket [args..] [options]
+
   -h, --help            show this help message and exit
   -o REPO_OWNER, --repo-owner REPO_OWNER
                         Example: mozilla-services (default: mozilla-services)
