@@ -18,9 +18,11 @@ Note: still under development. FOR OPS USE ONLY.
 
 **Example**
 
- "-------------------"
+::
+
+ -------------------
  RELEASE NOTES
- "-------------------"
+ -------------------
  https://github.com/mozilla/loop-client/releases
 
  COMPARISONS
@@ -34,13 +36,13 @@ Note: still under development. FOR OPS USE ONLY.
 
  CHANGELOG
  0.15.0 (2015-03-09)
- "-------------------"
+ -------------------
 
- \- `Bug 1047040 <https://bugzilla.mozilla.org/show_bug.cgi?id=1047040>`_ \- Add browser-specific graphic of GUM prompt to the media-wait message
- \- `Bug 1131550 <https://bugzilla.mozilla.org/show_bug.cgi?id=1131550>`_ \- Loop-client extraction script should preserve locale information when importing m-c changes
- \- `Bug 1135133 <https://bugzilla.mozilla.org/show_bug.cgi?id=1135133>`_ \- Loop-client extraction script should support pulling from different repositories/branches
- \- `Bug 1137469 <https://bugzilla.mozilla.org/show_bug.cgi?id=1137469>`_ \- If an uncaught exception occurs whilst processing an action, the dispatcher can fail, rendering parts of Loop inactive
- \- `Bug 1131568 <https://bugzilla.mozilla.org/show_bug.cgi?id=1131568>`_ \- Update the OpenTok SDK to version 2.5.0
+ - Bug 1047040 - Add browser-specific graphic of GUM prompt to the media-wait message
+ - Bug 1131550 - Loop-client extraction script should preserve locale information when importing m-c changes
+ - Bug 1135133 - Loop-client extraction script should support pulling from different repositories/branches
+ - Bug 1137469 - If an uncaught exception occurs whilst processing an action, the dispatcher can fail, rendering parts of Loop inactive
+ - Bug 1131568 - Update the OpenTok SDK to version 2.5.0
 
 
 
