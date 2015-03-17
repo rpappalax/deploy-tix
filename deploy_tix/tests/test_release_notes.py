@@ -4,7 +4,6 @@ import mock
 import requests
 import responses
 from urlparse import urlparse
-
 from deploy_tix.release_notes import ReleaseNotes
 
 

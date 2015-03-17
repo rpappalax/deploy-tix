@@ -26,10 +26,17 @@ Instead, create an access token from your github home page.  Go to:
 
  - Settings > Applications > Generate New Token
  - Create an environment variable 'ACCESS_TOKEN' or enter it into the config.py:
-   `$ export ACCESS_TOKEN=<your_access_token_here>`
+
+.. code:: bash
+
+   $ export ACCESS_TOKEN=<your_access_token_here>
+
  - Build and run:
- - `$ make build`
- - `$ source ./build/venv/bin/activate`
+
+.. code:: bash
+
+   $ make build
+   $ source ./build/venv/bin/activate
 
 
 Options
@@ -48,8 +55,8 @@ Usage: ticket [args..] [options]
   -r REPO, --repo REPO  Example: loop-server (default: None)
   -e ENVIRONMENT, --environment ENVIRONMENT
                         Enter: STAGE, PROD (default: STAGE)
-  -u BUGZILLA_USERNAME, --bugzilla-username BUGZILLA_USERNAME
-  -p BUGZILLA_PASSWORD, --bugzilla-password BUGZILLA_PASSWORD
+  -u BUGZILLA_USERNAME, --bugzilla-username BUGZILLA_USERNAME (default: None)
+  -p BUGZILLA_PASSWORD, --bugzilla-password BUGZILLA_PASSWORD (default: None)
   -z, --bugzilla-prod   Add this option, and you'll post to bugzilla prod
                         (default: False)
 
@@ -58,8 +65,14 @@ Example
 ----------------
 
   - Post to bugzilla-dev
-    `$ ticket -h -r mozilla-services -a loop-server -e STAGE -u johnny@quest.com -p password123`
+
+.. code:: bash
+
+    $ ticket -h -r mozilla-services -a loop-server -e STAGE -u johnny@quest.com -p password123
 
   - Post to bugzilla (add -z option)
-    `$ ticket -h -r mozilla-services -a loop-server -e STAGE -u johnny@quest.com -p password123 -z`
+
+.. code:: bash
+
+    $ ticket -h -r mozilla-services -a loop-server -e STAGE -u johnny@quest.com -p password123 -z
 
