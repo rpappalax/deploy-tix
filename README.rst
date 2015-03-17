@@ -3,10 +3,11 @@ deploy-tix
 
 Python scripts to generate Bugzilla deployment tickets for Mozilla Services.
 
-Still under heavy development. FOR OPS USE AND DEMO ONLY.
+Still under development. FOR OPS USE ONLY.
 
 .. image:: https://travis-ci.org/rpappalax/deploy-tix.svg?branch=dev-rpapa
     :target: https://travis-ci.org/rpappalax/deploy-tix
+
 
 Projects
 -----------
@@ -16,6 +17,8 @@ Projects
  - shavar
  - pushgo
 
+
+
 Setup
 -----------
 deploy-tix will make multiple calls to github API.
@@ -23,27 +26,28 @@ You're allowed up to 60 calls / hour without authentication, but you'll soon
 run out!
 
 Instead, create an access token from your github home page.  Go to:
+#. Settings > Applications > Generate New Token
+#. Create an environment variable 'ACCESS_TOKEN' or enter it into the config.py:
 
- - Settings > Applications > Generate New Token
- - Create an environment variable 'ACCESS_TOKEN' or enter it into the config.py:
+  ::
 
-   ::
-
-   $ export ACCESS_TOKEN=<your_access_token_here>
-
-
- - Build and run:
-
-   ::
-
-   $ make build
-   $ source ./build/venv/bin/activate
+  $ export ACCESS_TOKEN=<your_access_token_here>
 
 
-Options
+
+Build
 -----------
 
-Scripts for creating / updating deployment tickets in Bugzilla
+  ::
+
+  $ make build
+  $ source ./build/venv/bin/activate
+
+
+
+Run
+-----------
+
 
 .. code:: python
 
@@ -59,21 +63,20 @@ Scripts for creating / updating deployment tickets in Bugzilla
   -z, --bugzilla-prod   Add this option, and you'll post to bugzilla prod  (default: False)
 
 
+
 Example
 ----------------
 
- - Post to bugzilla-dev
+Post to bugzilla-dev
 
   ::
 
-  $ ticket -h -r mozilla-services -a loop-server -e STAGE  \
-  -u johnny@quest.com -p password123
+  $ ticket -h -r mozilla-services -a loop-server -e STAGE -u johnny@quest.com -p password123
 
 
- - Post to bugzilla (add -z option)
+Post to bugzilla (add -z option)
 
   ::
 
-  $ ticket -h -r mozilla-services -a loop-server -e STAGE \
-  -u johnny@quest.com -p password123 -z
+  $ ticket -h -r mozilla-services -a loop-server -e STAGE -u johnny@quest.com -p password123 -z
 
