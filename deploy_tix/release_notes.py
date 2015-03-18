@@ -52,15 +52,18 @@ class ReleaseNotes(object):
             exit('\nMissing github param\n\nABORTING!\n\n')
 
         self._token_string = self._get_token_string(ACCESS_TOKEN)
+
         self._url_github = self._get_url_github(
             HOST_GITHUB, repo_owner, repo)
         self._url_github_api = self._get_url_github_api(
             HOST_GITHUB, repo_owner, repo)
         self._url_github_raw = self._get_url_github(
             HOST_GITHUB_RAW, repo_owner, repo)
-        url = self._get_url_tags(
+
+        url = self._url_github_api_tags(
             self._url_github_api, self._token_string)
         req = self._get_tags(url)
+
         self._tags = req.json()
         self._max_comparisons = self._get_max_comparisons(self._tags)
         self._latest_tags = self._get_latest_tags()
@@ -101,9 +104,44 @@ class ReleaseNotes(object):
             repo
         )
 
-    def _get_url_tags(self, url_github_api, token_string):
+    def _url_github_api_tags(self, url_github_api, token_string):
 
-        return '{0}/refs/tags{1}'.format(url_github_api, token_string)
+        return '{0}/refs/tags{1}'.format(
+            url_github_api,
+            token_string
+        )
+
+    def _url_changelog(self, url_github_raw, commit_sha, filename):
+
+        return '{0}/{1}/{2}'.format(
+            url_github_raw,
+            commit_sha,
+            filename
+        )
+
+    def _url_last_tag(self, url_github_api, last_tag_sha, token_string):
+
+        return '{0}/tags/{1}{2}'.format(
+            url_github_api,
+            last_tag_sha,
+            token_string
+        )
+
+    def _url_comparison(self, url_github, start, end):
+
+        return '{0}/compare/{1}...{2}'.format(
+            url_github,
+            start,
+            end
+        )
+
+    def _url_tag(self, url_github, tag_version):
+
+        return '{0}/releases/tag/{1}'.format(url_github, tag_version)
+
+    def _url_tag_commit(self, url_github, commit_sha):
+
+        return '{0}/commit/{1}'.format(url_github, commit_sha)
 
     def _get_max_comparisons(self, tags):
         """Calculates max comparisons to show
@@ -192,11 +230,8 @@ class ReleaseNotes(object):
 
         last_tag = self._last_tag
         if last_tag[TYPE] == 'tag':
-            url = '{0}/tags/{1}{2}'.format(
-                self._url_github_api,
-                last_tag[SHA],
-                self._token_string)
-
+            url = self._url_last_tag(
+                self._url_github_api, last_tag[SHA], self._token_string)
             req = self._get_tags(url)
             return req.json()['object']['sha']
         else:
@@ -215,7 +250,8 @@ class ReleaseNotes(object):
         """"Parse and return CHANGELOG for latest tag as string"""
 
         for filename in CHANGELOG_FILENAMES:
-            url = '{0}/{1}/{2}'.format(self._url_github_raw, commit_sha, filename)
+            url = self._url_changelog(
+                self._url_github_raw, commit_sha, filename)
             req = requests.get(url)
             try:
                 if 'Not Found' in req.text:
@@ -263,8 +299,7 @@ class ReleaseNotes(object):
         for i in xrange(0, self._max_comparisons - 1):
             start = self._latest_tags[i][VERS]
             end = self._latest_tags[i + 1][VERS]
-            notes += '{0}/compare/{1}...{2}'.format(self._url_github, start, end) \
-                     + '\n'
+            notes += self._url_comparison(self._url_github, start, end) + '\n'
         self.output.log('comparisons section - DONE!')
         return notes
 
@@ -273,12 +308,11 @@ class ReleaseNotes(object):
 
         commit_sha = self._get_commit_sha()
         notes = self.output.get_sub_header('TAGS')
-
-        notes += '{0}/releases/tag/{1}'.format(
+        notes += self._url_tag(
             self._url_github,
-            self._latest_tags[self._max_comparisons - 1][VERS]) + '\n'
-
-        notes += '{0}/commit/{1}'.format(self._url_github, commit_sha) + '\n'
+            self._latest_tags[self._max_comparisons - 1][VERS]
+        ) + '\n'
+        notes += self._url_tag_commit(self._url_github, commit_sha) + '\n'
         notes += self._get_section_changelog(commit_sha)
         self.output.log('tags section - DONE!')
         return notes

@@ -16,29 +16,48 @@ MOCK_REPO = 'shavar'
 MOCK_ENV = 'STAGE'
 ACCESS_TOKEN = 'xxxxxxxxxx'
 
-def response_mock(path_local):
-    with open(path_local) as f:
-        mock_data = f.read()
-    return mock_data
 
-@responses.activate
-def test_get_tags(url, path_local):
 
-    url = 'https://api.github.com/repos/mozilla-services/shavar/git/refs/tags'
-    url_parsed = urlparse(url)
-
-    path_remote = '{0}://{1}{2}'.format(
-        url_parsed.scheme,
-        url_parsed.netloc,
-        url_parsed.path
-    )
-    path_local = '{0}/{1}{2}'.format(
+def url_mock(url_remote):
+    url_parsed = urlparse(url_remote)
+    # path_remote = '{0}://{1}{2}'.format(
+    #     url_parsed.scheme,
+    #     url_parsed.netloc,
+    #     url_parsed.path
+    # )
+    return '{0}/{1}{2}'.format(
         'deploy_tix/tests/mocks',
         url_parsed.netloc,
         url_parsed.path
     )
 
-    mock_data = response_mock(path_local)
+
+def mock_fixture(path_local):
+    # path_local = url_mock(url_remote)
+    with open(path_local) as f:
+        mock_data = f.read()
+    return mock_data
+
+@responses.activate
+def mock_response(path_remote):
+    path_local = url_mock(path_remote)
+    path_remote = 'https://api.github.com/repos/mozilla-services/shavar/git/refs/tags'
+
+    # path_local = url_mock(path_remote)
+    # url_parsed = urlparse(path_remote)
+
+    # path_remote = '{0}://{1}{2}'.format(
+    #     url_parsed.scheme,
+    #     url_parsed.netloc,
+    #     url_parsed.path
+    # )
+    # path_local = '{0}/{1}{2}'.format(
+    #     'deploy_tix/tests/mocks',
+    #     url_parsed.netloc,
+    #     url_parsed.path
+    # )
+
+    mock_data = mock_fixture(path_local)
 
     responses.add(responses.GET,
                   path_remote,
@@ -52,6 +71,7 @@ def test_get_tags(url, path_local):
     assert resp.json() == json.loads(mock_data)
     assert responses.calls[0].response.text == mock_data
 
+    return resp
 
 
 class ReleaseNotesTestCase(unittest.TestCase):
@@ -64,12 +84,12 @@ class ReleaseNotesTestCase(unittest.TestCase):
             repo=MOCK_REPO,
             environment=MOCK_ENV
         )
-
-        self.token_path = self.mock_rel_notes._get_token_string(ACCESS_TOKEN)
-        self.url_github = self.mock_rel_notes._get_url_github(
-            HOST_GITHUB, MOCK_REPO_OWNER, MOCK_REPO)
-        self.url_github_api = self.mock_rel_notes._get_url_github_api(
-            HOST_GITHUB, MOCK_REPO_OWNER, MOCK_REPO)
+        #
+        # self.token_path = self.mock_rel_notes._get_token_string(ACCESS_TOKEN)
+        # self.url_github = self.mock_rel_notes._get_url_github(
+        #     HOST_GITHUB, MOCK_REPO_OWNER, MOCK_REPO)
+        # self.url_github_api = self.mock_rel_notes._get_url_github_api(
+        #     HOST_GITHUB, MOCK_REPO_OWNER, MOCK_REPO)
 
         # req = self._get_tags(url)
         # self._tags = req.json()
@@ -77,10 +97,12 @@ class ReleaseNotesTestCase(unittest.TestCase):
         # self._latest_tags = self._get_latest_tags()
         # self._last_tag = self._get_last_tag()
         # self._last_tag_version = self._last_tag[VERS]
+        pass
 
     def test_get_last_tag(self):
 
         # print self.mock_rel_notes._get_last_tag.return_value
+
         pass
 
     def test_get_token_string(self):
@@ -131,10 +153,30 @@ class ReleaseNotesTestCase(unittest.TestCase):
             self.assertTrue(result == len(tags), failure_msg)
 
 
-    # def test_get_tags(self):
-    #
-    #     pass
-    #
+    # @mock.patch('deploy_tix.release_notes.requests.get', side_effect=mock_response)
+    def test_get_tags(self):
+        path_remote = 'https://api.github.com/repos/mozilla-services/shavar/git/refs/tags'
+        # print self.mock_rel_notes._get_tags(path_remote)
+
+
+        path_local = url_mock(path_remote)
+
+        mock_data = mock_fixture(path_local)
+
+        responses.add(responses.GET,
+                      path_remote,
+                      body=mock_data,
+                      status=200,
+                      content_type='application/json')
+        resp = requests.get(path_remote)
+        # resp = self.mock_rel_notes._get_tags(path_remote)
+
+        # print '*************'
+        # print resp.json()
+        # print '*************'
+        #
+        # assert len(resp) > 1
+
     # def test_parse_tag(self):
     #
     #     pass
