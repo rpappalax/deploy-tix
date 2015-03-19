@@ -87,9 +87,9 @@ class ReleaseNotesTestCase(unittest.TestCase):
         )
         #
         # self.token_path = self.mock_rel_notes._get_token_string(ACCESS_TOKEN)
-        # self.url_github = self.mock_rel_notes._get_url_github(
+        # self.url_github = self.mock_rel_notes._url_github(
         #     HOST_GITHUB, MOCK_REPO_OWNER, MOCK_REPO)
-        # self.url_github_api = self.mock_rel_notes._get_url_github_api(
+        # self.url_github_api = self.mock_rel_notes._url_github_api(
         #     HOST_GITHUB, MOCK_REPO_OWNER, MOCK_REPO)
 
         # req = self._get_tags(url)
@@ -108,8 +108,9 @@ class ReleaseNotesTestCase(unittest.TestCase):
 
     def test_get_token_string(self):
 
-        token_path_match = '?access_token=xxxxxxxxxx'
-        self.assertTrue(self.token_path == token_path_match,
+        token_path_match = '?access_token=XXXXXXXX'
+        token_path = self.mock_rel_notes._get_token_string('XXXXXXXX')
+        self.assertTrue(token_path == token_path_match,
                         'Token string path is incorrect')
 
     def test_get_url_github(self):
@@ -125,19 +126,24 @@ class ReleaseNotesTestCase(unittest.TestCase):
         url = self.mock_rel_notes._get_url_github_api('HOST', 'REPO-OWNER', 'REPO')
         self.assertTrue(url == url_match, 'URL github API is incorrect')
 
-    def test_url_github_api_tags(self):
+    def test_get_url_github_api_tags(self):
 
         # url_match = 'https://api.github.com/repos/mozilla-services/shavar/' \
         #     'git/refs/tags?access_token=xxxxxxxxxx'
 
         url_match = 'HTTPS://HOST-URL/refs/tags?ACCESS_TOKEN=XXXXXXXX'
-        url = self.mock_rel_notes._url_github_api_tags('HTTPS://HOST-URL', '?ACCESS_TOKEN=XXXXXXXX')
+        url = self.mock_rel_notes._get_url_github_api_tags('HTTPS://HOST-URL', '?ACCESS_TOKEN=XXXXXXXX')
         print '**************'
         print url
         print url_match
         print '**************'
         self.assertTrue(url == url_match, 'URL github API is incorrect')
 
+    def test_url_changelog(self):
+
+        url_match = 'HTTPS://HOST/ABCDEFGHIJKLMNOPQRSTUVWXYZ/CHANGELOG.RST'
+        url = self.mock_rel_notes._url_changelog('HTTPS://HOST', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'CHANGELOG.RST')
+        self.assertTrue(url == url_match, 'URL for CHANGELOG is incorrect')
 
     @mock.patch('deploy_tix.release_notes', 'MAX_COMPARISONS_TO_SHOW=4')
     def test_get_max_comparisons(self):
@@ -161,36 +167,44 @@ class ReleaseNotesTestCase(unittest.TestCase):
     # @mock.patch('deploy_tix.release_notes.requests.get', side_effect=mock_response)
     def test_get_tags(self):
         path_remote = 'https://api.github.com/repos/mozilla-services/shavar/git/refs/tags'
+        # url_match = 'https://api.github.com/repos/mozilla-services/shavar/' \
+        #     'git/refs/tags?access_token=xxxxxxxxxx'
         # print self.mock_rel_notes._get_tags(path_remote)
 
 
         path_local = url_mock(path_remote)
 
         mock_data = mock_fixture(path_local)
-        #
-        # responses.add(responses.GET,
-        #               path_remote,
-        #               body=mock_data,
-        #               status=200,
-        #               content_type='application/json')
+
+        responses.add(responses.GET,
+                      path_remote,
+                      body=mock_data,
+                      status=200,
+                      content_type='application/json')
         # resp = requests.get(path_remote)
 
+        print responses.calls
+        assert len(responses.calls) == 1
+        assert responses.calls[0].request.url == path_remote
+        # assert resp.json() == json.loads(mock_data)
+        assert responses.calls[0].request.text == mock_data
+        tags = self._mock_rel_notes._get_tags(path_remote)
+        print '^^^^^^^^^^^^^^^^^^^^^^^^^^'
+        print '^^^^^^^^^^^^^^^^^^^^^^^^^^'
+        print tags
+        print '^^^^^^^^^^^^^^^^^^^^^^^^^^'
+        print '^^^^^^^^^^^^^^^^^^^^^^^^^^'
 
-
-        with patch.object(requests, 'get') as get_mock:
-            get_mock.return_value = mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.text = mock_data
-
-            tags = self._mock_rel_notes._get_tags()
-            print '*********************'
-            print tags.text
-            print '*********************'
-            assert tags.text == mock_data
-
-
-
-
+        # with patch.object(requests, 'get') as get_mock:
+        #     get_mock.return_value = mock_response = Mock()
+        #     mock_response.status_code = 200
+        #     mock_response.text = mock_data
+        #
+        #     tags = self._mock_rel_notes._get_tags()
+        #     print '*********************'
+        #     print tags.text
+        #     print '*********************'
+        #     assert tags.text == mock_data
 
 
         # resp = self.mock_rel_notes._get_tags(path_remote)

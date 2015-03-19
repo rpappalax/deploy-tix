@@ -19,43 +19,31 @@ Note: still under development. FOR OPS USE ONLY.
 
 **Example**
 
-::
+.. parsed-literal::
 
  -------------------
  RELEASE NOTES
  -------------------
 
-.. parsed-literal::
-
  `<https://github.com/mozilla/loop-client/releases>`_
 
-::
 
  COMPARISONS
 
-.. parsed-literal::
+ `<https://github.com/mozilla/loop-client/compare/0.13.4...0.13.5>`_
+ `<https://github.com/mozilla/loop-client/compare/0.13.5...0.14.0>`_
+ `<https://github.com/mozilla/loop-client/compare/0.14.0...0.15.0>`_
 
-  `<https://github.com/mozilla/loop-client/compare/0.13.4...0.13.5>`_
-  `<https://github.com/mozilla/loop-client/compare/0.13.5...0.14.0>`_
-  `<https://github.com/mozilla/loop-client/compare/0.14.0...0.15.0>`_
-
-::
 
  TAGS
 
-.. parsed-literal::
-
-  `<https://github.com/mozilla/loop-client/releases/tag/0.15.0>`_
-  `<https://github.com/mozilla/loop-client/commit/d706753dbcacfe17081d8c04b54652dbee36302f>`_
-
-::
+ `<https://github.com/mozilla/loop-client/releases/tag/0.15.0>`_
+ `<https://github.com/mozilla/loop-client/commit/d706753dbcacfe17081d8c04b54652dbee36302f>`_
 
 
  CHANGELOG
  0.15.0 (2015-03-09)
  -------------------
-
-.. parsed-literal::
 
   \- `Bug 1047040 <https://bugzilla.mozilla.org/show_bug.cgi?id=1047040>`_ - Add browser-specific graphic of GUM prompt to the media-wait message
   \- `Bug 1131550 <https://bugzilla.mozilla.org/show_bug.cgi?id=1131550>`_ - Loop-client extraction script should preserve locale information when importing m-c changes

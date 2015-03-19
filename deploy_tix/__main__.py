@@ -68,11 +68,15 @@ def main(args=None):
     description = notes.get_release_notes()
     release_num = notes.last_tag
 
+    output.log('Release Notes', True)
+    output.log(description)
+
     ticket = BugzillaRESTAPI(
         url_bugzilla, bugzilla_username, bugzilla_password)
 
     ticket.create_bug(
         release_num, repo, environment, status, description)
+
 
 if __name__ == '__main__':
     main()

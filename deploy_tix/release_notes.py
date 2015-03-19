@@ -45,28 +45,30 @@ class ReleaseNotes(object):
 
         self.output = OutputHelper()
         if all([repo_owner, repo, environment]):
-            self.repo_owner = repo_owner
-            self.repo = repo
-            self.environment = environment.upper()
+            self._repo_owner = repo_owner
+            self._repo = repo
+            self._environment = environment.upper()
         else:
             exit('\nMissing github param\n\nABORTING!\n\n')
 
+
+        self._url_github_api = self._get_url_github_api(
+            HOST_GITHUB,
+            repo_owner,
+            repo
+        )
+
         self._token_string = self._get_token_string(ACCESS_TOKEN)
 
-        self._url_github = self._get_url_github(
-            HOST_GITHUB, repo_owner, repo)
-        self._url_github_api = self._get_url_github_api(
-            HOST_GITHUB, repo_owner, repo)
-        self._url_github_raw = self._get_url_github(
-            HOST_GITHUB_RAW, repo_owner, repo)
-
-        url = self._url_github_api_tags(
-            self._url_github_api, self._token_string)
+        url = self._get_url_github_api_tags(
+            self._url_github_api,
+            self._token_string
+        )
         req = self._get_tags(url)
 
-        self._tags = req.json()
-        self._max_comparisons = self._get_max_comparisons(self._tags)
-        self._latest_tags = self._get_latest_tags()
+        tags = req.json()
+        self._max_comparisons = self._get_max_comparisons(tags)
+        self._latest_tags = self._get_latest_tags(tags)
         self._last_tag = self._get_last_tag()
         self._last_tag_version = self._last_tag[VERS]
 
@@ -86,6 +88,7 @@ class ReleaseNotes(object):
             return '?access_token={0}'.format(access_token)
         return ''
 
+    # def _get_url_github(self, host_github, repo_owner, repo):
     def _get_url_github(self, host_github, repo_owner, repo):
         """Return github root URL as string"""
 
@@ -104,7 +107,7 @@ class ReleaseNotes(object):
             repo
         )
 
-    def _url_github_api_tags(self, url_github_api, token_string):
+    def _get_url_github_api_tags(self, url_github_api, token_string):
 
         return '{0}/refs/tags{1}'.format(
             url_github_api,
@@ -142,6 +145,10 @@ class ReleaseNotes(object):
     def _url_tag_commit(self, url_github, commit_sha):
 
         return '{0}/commit/{1}'.format(url_github, commit_sha)
+
+    def _url_releases(self, url_github):
+
+        return '{0}/releases'.format(url_github)
 
     def _get_max_comparisons(self, tags):
         """Calculates max comparisons to show
@@ -190,7 +197,7 @@ class ReleaseNotes(object):
         self.output.log((release_num, creation_date))
         return [release_num, sha, type, url, creation_date]
 
-    def _get_latest_tags(self):
+    def _get_latest_tags(self, tags):
         """Github API returns all tags indiscriminately, but
         we only want the latest.
 
@@ -200,8 +207,9 @@ class ReleaseNotes(object):
         """
 
         self.output.log('Retrieve all tags', True)
-        start = len(self._tags) - self._max_comparisons
-        tags = self._tags
+        # start = len(self._tags) - self._max_comparisons
+        start = len(tags) - self._max_comparisons
+        # tags = self._tags
         tags_unsorted = []
         for i in xrange(len(tags)):
             tag = self._parse_tag(tags[i])
@@ -231,7 +239,10 @@ class ReleaseNotes(object):
         last_tag = self._last_tag
         if last_tag[TYPE] == 'tag':
             url = self._url_last_tag(
-                self._url_github_api, last_tag[SHA], self._token_string)
+                self._url_github_api,
+                last_tag[SHA],
+                self._token_string
+            )
             req = self._get_tags(url)
             return req.json()['object']['sha']
         else:
@@ -249,9 +260,16 @@ class ReleaseNotes(object):
     def _get_changelog(self, commit_sha):
         """"Parse and return CHANGELOG for latest tag as string"""
 
+        # url_github_raw = self._get_url_github(
+        #     HOST_GITHUB_RAW, self._repo_owner, self._repo)
+        url_github_raw = self._get_url_github(
+            HOST_GITHUB_RAW, self._repo_owner, self._repo)
+
         for filename in CHANGELOG_FILENAMES:
+            # url = self._url_changelog(
+            #     self._url_github_raw, commit_sha, filename)
             url = self._url_changelog(
-                self._url_github_raw, commit_sha, filename)
+                url_github_raw, commit_sha, filename)
             req = requests.get(url)
             try:
                 if 'Not Found' in req.text:
@@ -284,14 +302,14 @@ class ReleaseNotes(object):
                 log += line + '\n'
         return log
 
-    def _get_section_release_notes(self):
+    def _get_section_release_notes(self, url_github):
         """Return bugzilla release notes with header as string"""
 
         notes = self.output.get_header('RELEASE NOTES')
-        notes += '{0}/releases'.format(self._url_github) + '\n'
+        notes += self._url_releases(url_github) + '\n'
         return notes
 
-    def _get_section_comparisons(self):
+    def _get_section_comparisons(self, url_github):
         """Return release notes - COMPARISONS section as string"""
 
         notes = self.output.get_sub_header('COMPARISONS')
@@ -299,20 +317,22 @@ class ReleaseNotes(object):
         for i in xrange(0, self._max_comparisons - 1):
             start = self._latest_tags[i][VERS]
             end = self._latest_tags[i + 1][VERS]
-            notes += self._url_comparison(self._url_github, start, end) + '\n'
+            notes += self._url_comparison(url_github, start, end) + '\n'
         self.output.log('comparisons section - DONE!')
         return notes
 
-    def _get_section_tags(self):
+    def _get_section_tags(self, url_github):
         """Return release notes - TAGS section as string"""
 
         commit_sha = self._get_commit_sha()
         notes = self.output.get_sub_header('TAGS')
+
         notes += self._url_tag(
-            self._url_github,
+            url_github,
             self._latest_tags[self._max_comparisons - 1][VERS]
         ) + '\n'
-        notes += self._url_tag_commit(self._url_github, commit_sha) + '\n'
+        notes += self._url_tag_commit(url_github, commit_sha) + '\n'
+
         notes += self._get_section_changelog(commit_sha)
         self.output.log('tags section - DONE!')
         return notes
@@ -330,10 +350,23 @@ class ReleaseNotes(object):
     def get_release_notes(self):
         """Return release notes for Bugzilla deployment ticket as string"""
 
+        # url_github = self._get_url_github(
+        #     HOST_GITHUB,
+        #     self._repo_owner,
+        #     self._repo
+        # )
+
+        url_github = self._get_url_github(
+            HOST_GITHUB,
+            self._repo_owner,
+            self._repo
+        )
+
+
         self.output.log('Create release notes', True)
-        notes = self._get_section_release_notes()
-        notes += self._get_section_comparisons()
-        notes += self._get_section_tags()
+        notes = self._get_section_release_notes(url_github)
+        notes += self._get_section_comparisons(url_github)
+        notes += self._get_section_tags(url_github)
         return notes
 
 
