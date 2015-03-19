@@ -2,6 +2,7 @@ import os
 import unittest
 import json
 import mock
+# from mock import Mock, patch
 import requests
 import responses
 from urlparse import urlparse
@@ -113,26 +114,30 @@ class ReleaseNotesTestCase(unittest.TestCase):
 
     def test_get_url_github(self):
 
-        url_match = 'https://github.com/mozilla-services/shavar'
-        self.assertTrue(self.url_github == url_match,
-                        'URL github is incorrect')
+        url_match = 'https://HOST/REPO-OWNER/REPO'
+        url = self.mock_rel_notes._get_url_github('HOST', 'REPO-OWNER', 'REPO')
+        self.assertTrue(url == url_match, 'URL github is incorrect')
 
     def test_get_url_github_api(self):
 
-        url_match = \
-            'https://api.github.com/repos/mozilla-services/shavar/git'
-        self.assertTrue(self.url_github_api == url_match,
-                        'URL github API is incorrect')
+        # url_match = 'https://api.github.com/repos/mozilla-services/shavar/git'
+        url_match = 'https://api.HOST/repos/REPO-OWNER/REPO/git'
+        url = self.mock_rel_notes._get_url_github_api('HOST', 'REPO-OWNER', 'REPO')
+        self.assertTrue(url == url_match, 'URL github API is incorrect')
 
-    def test_get_url_tags(self):
+    def test_url_github_api_tags(self):
 
-        url = self.mock_rel_notes._get_url_tags(
-            self.url_github_api, self.token_path)
-        url_match = \
-            'https://api.github.com/repos/mozilla-services/shavar/' \
-            'git/refs/tags?access_token=xxxxxxxxxx'
-        self.assertTrue(url == url_match,
-                        'URL github API is incorrect')
+        # url_match = 'https://api.github.com/repos/mozilla-services/shavar/' \
+        #     'git/refs/tags?access_token=xxxxxxxxxx'
+
+        url_match = 'HTTPS://HOST-URL/refs/tags?ACCESS_TOKEN=XXXXXXXX'
+        url = self.mock_rel_notes._url_github_api_tags('HTTPS://HOST-URL', '?ACCESS_TOKEN=XXXXXXXX')
+        print '**************'
+        print url
+        print url_match
+        print '**************'
+        self.assertTrue(url == url_match, 'URL github API is incorrect')
+
 
     @mock.patch('deploy_tix.release_notes', 'MAX_COMPARISONS_TO_SHOW=4')
     def test_get_max_comparisons(self):
@@ -162,13 +167,32 @@ class ReleaseNotesTestCase(unittest.TestCase):
         path_local = url_mock(path_remote)
 
         mock_data = mock_fixture(path_local)
+        #
+        # responses.add(responses.GET,
+        #               path_remote,
+        #               body=mock_data,
+        #               status=200,
+        #               content_type='application/json')
+        # resp = requests.get(path_remote)
 
-        responses.add(responses.GET,
-                      path_remote,
-                      body=mock_data,
-                      status=200,
-                      content_type='application/json')
-        resp = requests.get(path_remote)
+
+
+        with patch.object(requests, 'get') as get_mock:
+            get_mock.return_value = mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.text = mock_data
+
+            tags = self._mock_rel_notes._get_tags()
+            print '*********************'
+            print tags.text
+            print '*********************'
+            assert tags.text == mock_data
+
+
+
+
+
+
         # resp = self.mock_rel_notes._get_tags(path_remote)
 
         # print '*************'

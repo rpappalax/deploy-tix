@@ -10,11 +10,12 @@ Note: still under development. FOR OPS USE ONLY.
 
 
 **Supported projects**
- - loop-server
  - loop-client
+ - loop-server
  - msisdn-gateway
  - shavar
  - pushgo
+ - readinglist
 
 **Example**
 
@@ -27,7 +28,6 @@ Note: still under development. FOR OPS USE ONLY.
 .. parsed-literal::
 
  `<https://github.com/mozilla/loop-client/releases>`_
- |
 
 ::
 
@@ -38,7 +38,6 @@ Note: still under development. FOR OPS USE ONLY.
   `<https://github.com/mozilla/loop-client/compare/0.13.4...0.13.5>`_
   `<https://github.com/mozilla/loop-client/compare/0.13.5...0.14.0>`_
   `<https://github.com/mozilla/loop-client/compare/0.14.0...0.15.0>`_
- |
 
 ::
 
@@ -48,7 +47,6 @@ Note: still under development. FOR OPS USE ONLY.
 
   `<https://github.com/mozilla/loop-client/releases/tag/0.15.0>`_
   `<https://github.com/mozilla/loop-client/commit/d706753dbcacfe17081d8c04b54652dbee36302f>`_
-  |
 
 ::
 
