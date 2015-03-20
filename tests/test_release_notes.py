@@ -1,7 +1,7 @@
 import unittest
 import requests
 import json
-from mock import Mock, MagicMock, patch
+from mock import Mock, patch
 from urlparse import urlparse
 from deploy_tix.release_notes import ReleaseNotes
 
@@ -46,19 +46,6 @@ class ReleaseNotesTestCase(unittest.TestCase):
             repo=MOCK_REPO,
             environment=MOCK_ENV
         )
-        #
-        # self._token_string = self._mock_rel_notes._get_token_string(ACCESS_TOKEN)
-        # self.url_github = self._mock_rel_notes._url_github(
-        #     HOST_GITHUB, MOCK_REPO_OWNER, MOCK_REPO)
-        # self.url_github_api = self._mock_rel_notes._url_github_api(
-        #     HOST_GITHUB, MOCK_REPO_OWNER, MOCK_REPO)
-
-        # req = self._get_tags(url)
-        # self._tags = req.json()
-        # self._max_comparisons = self._get_max_comparisons(self._tags)
-        # self._latest_tags = self._get_latest_tags()
-        # self._last_tag = self._get_last_tag()
-        # self._last_tag_version = self._last_tag[VERS]
 
     def test_get_last_tag(self):
 
@@ -76,12 +63,14 @@ class ReleaseNotesTestCase(unittest.TestCase):
     def test_get_url_github(self):
 
         url_match = 'https://HOST/REPO-OWNER/REPO'
-        url = self._mock_rel_notes._get_url_github('HOST', 'REPO-OWNER', 'REPO')
+        url = self._mock_rel_notes._get_url_github(
+            'HOST', 'REPO-OWNER', 'REPO')
         self.assertTrue(url == url_match, 'URL github is incorrect')
 
     def test_get_url_github_api(self):
 
-        # url_match = 'https://api.github.com/repos/mozilla-services/shavar/git'
+        # url_match = 'https://api.github.com/repos/' + \
+        #     'mozilla-services/shavar/git'
 
         url_match = 'https://api.HOST/repos/REPO-OWNER/REPO/git'
         url = self._mock_rel_notes._get_url_github_api(
@@ -131,7 +120,8 @@ class ReleaseNotesTestCase(unittest.TestCase):
 
     def test_get_tags(self):
 
-        url =  'https://api.github.com/repos/mozilla-services/shavar/git/refs/tags?access_token=xxxxxxxx'
+        url = 'https://api.github.com/repos/mozilla-services/shavar/' + \
+              'git/refs/tags?access_token=xxxxxxxx'
         path_local = url_mock(url)
         mock_data = mock_fixture(path_local)
 
@@ -148,7 +138,7 @@ class ReleaseNotesTestCase(unittest.TestCase):
             u'0.1',
             u'1c4cff1014a869fd4c50b14f817e9c73ea0625e4',
             u'commit',
-            u'https://api.github.com/repos/mozilla-services/shavar/git/commits/1c4cff1014a869fd4c50b14f817e9c73ea0625e4?access_token=6b4e4a46d34c289f0974283d087e0a1b2124f004',
+            u'https://api.github.com/repos/mozilla-services/shavar/git/commits/1c4cff1014a869fd4c50b14f817e9c73ea0625e4?access_token=6b4e4a46d34c289f0974283d087e0a1b2124f004', # noqa
             u'2014-09-12'
         ]
 

@@ -51,7 +51,6 @@ class ReleaseNotes(object):
         else:
             exit('\nMissing github param\n\nABORTING!\n\n')
 
-
         self._url_github_api = self._get_url_github_api(
             HOST_GITHUB,
             repo_owner,

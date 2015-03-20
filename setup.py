@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from setuptools import setup, find_packages
+from setuptools import setup
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -36,6 +36,6 @@ setup(
         'Programming Language :: Python :: 3.3',
     ],
     entry_points={
-        'console_scripts':['ticket = deploy_tix.__main__:main']
+        'console_scripts': ['ticket = deploy_tix.__main__:main']
     },
 )
