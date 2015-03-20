@@ -64,6 +64,7 @@ class ReleaseNotes(object):
             self._url_github_api,
             self._token_string
         )
+
         req = self._get_tags(url)
 
         tags = req.json()
@@ -88,7 +89,6 @@ class ReleaseNotes(object):
             return '?access_token={0}'.format(access_token)
         return ''
 
-    # def _get_url_github(self, host_github, repo_owner, repo):
     def _get_url_github(self, host_github, repo_owner, repo):
         """Return github root URL as string"""
 
@@ -114,7 +114,7 @@ class ReleaseNotes(object):
             token_string
         )
 
-    def _url_changelog(self, url_github_raw, commit_sha, filename):
+    def _get_url_changelog(self, url_github_raw, commit_sha, filename):
 
         return '{0}/{1}/{2}'.format(
             url_github_raw,
@@ -207,9 +207,7 @@ class ReleaseNotes(object):
         """
 
         self.output.log('Retrieve all tags', True)
-        # start = len(self._tags) - self._max_comparisons
         start = len(tags) - self._max_comparisons
-        # tags = self._tags
         tags_unsorted = []
         for i in xrange(len(tags)):
             tag = self._parse_tag(tags[i])
@@ -260,15 +258,11 @@ class ReleaseNotes(object):
     def _get_changelog(self, commit_sha):
         """"Parse and return CHANGELOG for latest tag as string"""
 
-        # url_github_raw = self._get_url_github(
-        #     HOST_GITHUB_RAW, self._repo_owner, self._repo)
         url_github_raw = self._get_url_github(
             HOST_GITHUB_RAW, self._repo_owner, self._repo)
 
         for filename in CHANGELOG_FILENAMES:
-            # url = self._url_changelog(
-            #     self._url_github_raw, commit_sha, filename)
-            url = self._url_changelog(
+            url = self._get_url_changelog(
                 url_github_raw, commit_sha, filename)
             req = requests.get(url)
             try:
@@ -350,18 +344,11 @@ class ReleaseNotes(object):
     def get_release_notes(self):
         """Return release notes for Bugzilla deployment ticket as string"""
 
-        # url_github = self._get_url_github(
-        #     HOST_GITHUB,
-        #     self._repo_owner,
-        #     self._repo
-        # )
-
         url_github = self._get_url_github(
             HOST_GITHUB,
             self._repo_owner,
             self._repo
         )
-
 
         self.output.log('Create release notes', True)
         notes = self._get_section_release_notes(url_github)
