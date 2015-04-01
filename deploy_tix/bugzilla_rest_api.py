@@ -77,10 +77,10 @@ class BugzillaRESTAPI(object):
         Returns:
             string token
         """
-
-        url = '{0}/rest/login?login={1}&password={2}'.format(
-            host, self.username, self.password)
-        req = requests.get(url)
+        
+        params = {'login': self.username, 'password': self.password}
+        url = '{0}/rest/login'.format(host)
+        req = requests.get(url, params=params)
         decoded = json.loads(req.text)
         try:
             if 'token' not in decoded:
