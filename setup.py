@@ -13,6 +13,12 @@ REQUIREMENTS = [
     'requests >= 2.5.1'
 ]
 
+REQUIREMENTS_TEST = [
+    'coverage',
+    'nose',
+    'mock >= 1.0.1'
+]
+
 KEYWORDS = [
     'deployment',
     'tickets'
@@ -26,6 +32,7 @@ setup(
     author_email='rpappalax@gmail.com',
     url='https://github.com/rpappalax/deploy-tix',
     license="MIT",
+    tests_require=REQUIREMENTS_TEST,
     install_requires=REQUIREMENTS,
     keywords=KEYWORDS,
     packages=['deploy_tix'],

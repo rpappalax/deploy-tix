@@ -8,6 +8,9 @@ Note: still under development. FOR OPS USE ONLY.
 .. image:: https://travis-ci.org/rpappalax/deploy-tix.svg?branch=dev-rpapa
     :target: https://travis-ci.org/rpappalax/deploy-tix
 
+.. image:: https://coveralls.io/repos/rpappalax/deploy-tix/badge.svg
+    :target: https://coveralls.io/r/rpappalax/deploy-tix
+
 
 **Supported projects**
  - loop-client

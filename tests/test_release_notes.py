@@ -138,7 +138,7 @@ class ReleaseNotesTestCase(unittest.TestCase):
             u'0.1',
             u'1c4cff1014a869fd4c50b14f817e9c73ea0625e4',
             u'commit',
-            u'https://api.github.com/repos/mozilla-services/shavar/git/commits/1c4cff1014a869fd4c50b14f817e9c73ea0625e4?access_token=6b4e4a46d34c289f0974283d087e0a1b2124f004', # noqa
+            u'https://api.github.com/repos/mozilla-services/shavar/git/commits/1c4cff1014a869fd4c50b14f817e9c73ea0625e4?access_token=xxxxxxxxxxxxxxxxxxx', # noqa
             u'2014-09-12'
         ]
 
@@ -150,41 +150,6 @@ class ReleaseNotesTestCase(unittest.TestCase):
         parsed_tag = self._mock_rel_notes._parse_tag(json_data[0])
         self.assertEqual(parsed_tag, parsed_tag_match)
 
-    # def test_get_latest_tags(self):
-    #
-    #     pass
-    #
-    # def test_get_commit_sha(self):
-    #
-    #     pass
-    #
-    # def test_get_commit_date(self):
-    #
-    #     pass
-    #
-    # def test_get_changelog(self):
-    #
-    #     pass
-    #
-    # def test_get_section_release_notes(self):
-    #
-    #     pass
-    #
-    # def test_get_section_comparisons(self):
-    #
-    #     pass
-    #
-    # def test_get_section_tags(self):
-    #
-    #     pass
-    #
-    # def test_get_section_changelog(self):
-    #
-    #     pass
-    #
-    # def test_get_release_notes(self):
-    #
-    #     pass
 
     def tearDown(self):
         pass
