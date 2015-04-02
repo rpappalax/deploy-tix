@@ -107,12 +107,12 @@ Post to bugzilla-dev
 
  ::
 
- $ ticket -h -r mozilla-services -a loop-server -e STAGE -u johnny@quest.com -p password123
+ $ ticket -o mozilla-services -r loop-server -e STAGE -u johnny@quest.com -p password123
 
 
 Post to bugzilla (add -z option)
 
  ::
 
- $ ticket -h -r mozilla-services -a loop-server -e STAGE -u johnny@quest.com -p password123 -z
+ $ ticket -o mozilla-services -r loop-server -e STAGE -u johnny@quest.com -p password123 -z
 
