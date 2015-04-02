@@ -33,6 +33,11 @@ $(VENVDIR)/COMPLETE: requirements.txt
 	$(PYTHON) ./setup.py develop
 	touch $(VENVDIR)/COMPLETE
 
+.PHONY: test ## Run tests
+test:
+	$(INSTALL) -r ./test_requirements.txt
+	tox -r
+
 .PHONY: clean  ## Clean all build files
 clean:
 	rm -rf build

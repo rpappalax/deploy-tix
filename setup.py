@@ -16,7 +16,8 @@ REQUIREMENTS = [
 REQUIREMENTS_TEST = [
     'coverage',
     'nose',
-    'mock >= 1.0.1'
+    'mock >= 1.0.1',
+	'tox'
 ]
 
 KEYWORDS = [

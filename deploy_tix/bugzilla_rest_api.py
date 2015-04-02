@@ -77,7 +77,10 @@ class BugzillaRESTAPI(object):
         Returns:
             string token
         """
-        params = { 'login': self.username, 'password': self.password}
+        params = {
+            'login': self.username,
+            'password': self.password
+        }
         url = '{0}/rest/login'.format(host)
         req = requests.get(url, params=params)
         decoded = json.loads(req.text)
