@@ -10,8 +10,10 @@ env:
     matrix:
     - secure: access_token
 install:
-    - pip install tox
+    - pip install coverage nose mock python-coveralls tox
 script:
     - tox -e $TOX_ENV
+after_success:
+    - coveralls
 notifications:
     irc: "irc.freenode.org#rpappalax"

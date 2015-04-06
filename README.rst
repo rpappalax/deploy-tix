@@ -17,8 +17,8 @@ Note: still under development. FOR OPS USE ONLY.
  - loop-server
  - msisdn-gateway
  - shavar
- - pushgo
  - readinglist
+ - pushgo (no CHANGELOG)
 
 **Example**
 

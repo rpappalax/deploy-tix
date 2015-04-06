@@ -5,7 +5,7 @@
 .Python
 
 env/
-build/
+venv/
 dist/
 sdist/
 *.egg-info/
