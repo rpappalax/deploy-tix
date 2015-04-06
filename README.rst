@@ -12,6 +12,8 @@ Note: still under development. FOR OPS USE ONLY.
     :target: https://coveralls.io/r/rpappalax/deploy-tix
 
 
+
+
 **Supported projects**
  - loop-client
  - loop-server
@@ -77,7 +79,7 @@ Build
  ::
 
  $ make build
- $ source ./build/venv/bin/activate
+ $ source ./venv/bin/activate
 
 
 
