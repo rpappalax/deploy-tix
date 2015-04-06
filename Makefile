@@ -14,12 +14,12 @@ $(VENV)/COMPLETE: requirements.txt
 	mkdir -p build
 	virtualenv --no-site-packages --python=`which python` --distribute $(VENV)
 	# virtualenv --no-site-packages --python='/usr/bin/python2.6' --distribute $(VENV)
-	$(INSTALL) -r ./requirements.txt
-	$(PYTHON) ./setup.py develop
+	$(INSTALL) -r requirements.txt
+	$(PYTHON) setup.py develop
 	touch $(VENV)/COMPLETE
 
 test:
-	$(INSTALL) -r ./test_requirements.txt
+	$(INSTALL) -r test_requirements.txt
 	tox -r
 
 clean:

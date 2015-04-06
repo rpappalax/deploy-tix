@@ -8,7 +8,6 @@
 import sys
 import json
 import requests
-
 from output_helper import OutputHelper
 
 URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.org'

@@ -2,7 +2,17 @@ import unittest
 import requests
 import json
 from mock import Mock, patch
-from urlparse import urlparse
+#from urlparse import urlparse
+
+try:
+    from urllib.parse import urlparse, urlencode
+    from urllib.request import urlopen, Request
+    from urllib.error import HTTPError
+except ImportError:
+    from urlparse import urlparse
+    from urllib import urlencode
+    from urllib2 import urlopen, Request, HTTPError
+
 from deploy_tix.release_notes import ReleaseNotes
 
 
