@@ -209,7 +209,6 @@ class ReleaseNotes(object):
         self.output.log('Retrieve all tags', True)
         start = len(tags) - self._max_comparisons
         tags_unsorted = []
-        # for i in xrange(len(tags)):
         for i in range(len(tags)):
             tag = self._parse_tag(tags[i])
             tags_unsorted.append(tag)
@@ -221,7 +220,6 @@ class ReleaseNotes(object):
 
         latest = []
         self.output.log('Get last tags from sorted list', True)
-        # for i in xrange(len(tags_sorted)):
         for i in range(len(tags_sorted)):
             if i >= start:
                 latest.append(tags_sorted[i])
@@ -310,7 +308,6 @@ class ReleaseNotes(object):
 
         notes = self.output.get_sub_header('COMPARISONS')
 
-        # for i in xrange(0, self._max_comparisons - 1):
         for i in range(0, self._max_comparisons - 1):
             start = self._latest_tags[i][VERS]
             end = self._latest_tags[i + 1][VERS]
