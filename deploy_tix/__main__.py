@@ -1,9 +1,9 @@
-
 import argparse
+import getpass
 from deploy_tix.bugzilla_rest_api import BugzillaRESTAPI
 from deploy_tix.github_api import GithubAPI
 
-URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.com'
+URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.org'
 URL_BUGZILLA_DEV = 'https://bugzilla-dev.allizom.org'
 
 
@@ -43,7 +43,7 @@ def main(args=None):
 
     parser.add_argument(
         '-p', '--bugzilla-password',
-        required=True)
+        required=False, default=None)
 
     parser.add_argument(
         '-z', '--bugzilla-prod',
@@ -59,6 +59,10 @@ def main(args=None):
     environment = args['environment']
     bugzilla_username = args['bugzilla_username']
     bugzilla_password = args['bugzilla_password']
+
+    if bugzilla_password is None:
+        bugzilla_password = getpass.getpass()
+
     if args['bugzilla_prod']:
         url_bugzilla = URL_BUGZILLA_PROD
     else:

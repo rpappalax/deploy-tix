@@ -11,7 +11,7 @@ setup(
     author_email='rpappalax@gmail.com',
     url='https://github.com/rpappalax/deploy-tix',
     license="MIT",
-    install_requires=['nose >= 1.3.4', 'requests >= 2.5.1', \
+    install_requires=['nose >= 1.3.4', 'requests >= 2.5.1',
                       'argparse >= 1.3.0'],
     keywords=['deploy', 'deployment', 'services', 'bugzilla'],
     packages=['deploy_tix'],
@@ -24,6 +24,8 @@ setup(
         'Programming Language :: Python :: 3.3',
     ],
     entry_points={
-        'console_scripts':['ticket = deploy_tix.__main__:main']
-    },
+        'console_scripts': [
+            'ticket = deploy_tix.__main__:main'
+        ]
+    }
 )
