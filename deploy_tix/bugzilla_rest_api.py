@@ -44,8 +44,8 @@ class BugzillaRESTAPI(object):
         """
 
         data = {
-            'product':'Mozilla Services',
-            'component':'General',
+            'product':'Cloud Services',
+            'component':'Operations: Deployment Requests',
             'version':'unspecified',
             'op_sys':'All',
             'rep_platform':'All'
