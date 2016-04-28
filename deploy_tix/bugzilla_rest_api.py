@@ -2,7 +2,7 @@
 
 .. _Bugzilla REST API Docs:
    https://wiki.mozilla.org/Bugzilla:REST_API
-   http://bugzilla.readthedocs.org/en/latest/api/index.html
+   http://bugzilla.readthedocs.io/en/latest/api/index.html
 """
 
 import sys
