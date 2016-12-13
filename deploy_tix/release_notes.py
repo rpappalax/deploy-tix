@@ -3,9 +3,8 @@
 Notes:
 [1]  Github tags API only deals with tag objects - so only annotated tags, not
      lightweight tags.
-[2] set an ACCESS_TOKEN or you'll be restricted to 60 reqs/hour (vs. 5000)
-
-"""
+[2] set an GITHUB_ACCESS_TOKEN or you'll be restricted to 60 reqs/hour
+     (vs. 5000)"""
 
 import os
 import sys
@@ -29,8 +28,8 @@ CHANGELOG_FILENAMES = []
 [CHANGELOG_FILENAMES.append(''.join(parts)) for parts in list(
     itertools.product(*[CHANGELOG_NAMES, EXT]))]
 
-if os.environ['ACCESS_TOKEN']:
-    ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
+if os.environ['GITHUB_ACCESS_TOKEN']:
+    ACCESS_TOKEN = os.environ['GITHUB_ACCESS_TOKEN']
 else:
     ACCESS_TOKEN = ''
 

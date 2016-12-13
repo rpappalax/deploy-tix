@@ -1,11 +1,7 @@
 import argparse
-import getpass
-from deploy_tix.bugzilla_rest_api import BugzillaRESTAPI
+from deploy_tix.bugzilla_rest_client import BugzillaRESTClient
 from deploy_tix.release_notes import ReleaseNotes
 from output_helper import OutputHelper
-
-URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.org'
-URL_BUGZILLA_DEV = 'https://bugzilla-dev.allizom.org'
 
 
 def main(args=None):
@@ -16,69 +12,88 @@ def main(args=None):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
+        '-a', '--application',
+        help='Example: loop-server',
+        required=True)
+
+    parser.add_argument(
+        '-B', '--bugzilla-mozilla',
+        help='Set this switch to post directly to bugzilla.mozilla.org \
+            (without switch posts to: bugzilla-dev.allizom.org)',
+        action='store_true',
+        default=False,
+        required=False)
+
+    subparsers = parser.add_subparsers(help='Ticket action')
+
+    # parser for ticket - {create} option
+    parser_create = \
+        subparsers.add_parser('NEW', help='Create a NEW deployment ticket.')
+
+    parser_create.add_argument(
         '-o', '--repo-owner',
         help='Example: mozilla-services',
         default='mozilla-services',
         required=False)
 
-    parser.add_argument(
-        '-r', '--repo',
-        help='Example: loop-server',
-        required=True)
-
-    parser.add_argument(
+    parser_create.add_argument(
         '-e', '--environment',
         help='Enter: STAGE, PROD',
         default='STAGE',
         required=False)
 
-    parser.add_argument(
-        '-u', '--bugzilla-username',
-        required=True)
-
-    parser.add_argument(
-        '-p', '--bugzilla-password',
-        required=False, default=None)
-
-    parser.add_argument(
-        '-z', '--bugzilla-prod',
-        help='Add this option, and you\'ll post to bugzilla prod',
-        action='store_true',
+    parser_create.add_argument(
+        '-m', '--cc-mail',
+        help='Example: xyz-services-dev@mozilla.com \
+            NOTE: must be a registered username!',
+        default='',
         required=False)
+
+    # parser for ticket - {upate} option
+    parser_update = subparsers.add_parser(
+        'UPDATE',
+        help='UPDATE an existing deployment ticket'
+    )
+    parser_update.add_argument(
+        '-i', '--bug-id',
+        help='Example: 1234567',
+        required=False)
+
+    parser_update.add_argument(
+        '-c', '--comment',
+        help='Enter: <your bug comment>',
+        required=True)
 
     args = vars(parser.parse_args())
 
-    repo_owner = args['repo_owner']
-    repo = args['repo']
-    environment = args['environment']
-    bugzilla_username = args['bugzilla_username']
-    bugzilla_password = args['bugzilla_password']
+    application = args['application']
+    bugzilla_mozilla = args['bugzilla_mozilla']
 
-    if bugzilla_password is None:
-        bugzilla_password = getpass.getpass()
+    ticket = BugzillaRESTClient(bugzilla_mozilla)
 
-    if args['bugzilla_prod']:
-        url_bugzilla = URL_BUGZILLA_PROD
-    else:
-        url_bugzilla = URL_BUGZILLA_DEV
+    if all(key in args for key in ['bug_id', 'comment']):
+        bug_id = args['bug_id']
+        comment = args['comment']
 
-    status = 'NEW'
+        ticket.bug_update(application, comment, bug_id)
 
-    output = OutputHelper()
-    output.log('Create deployment ticket', True, True)
-    notes = ReleaseNotes(repo_owner, repo, environment)
-    description = notes.get_release_notes()
-    release_num = notes.last_tag
+    if all(key in args for key in ['repo_owner', 'application', 'environment']): # noqa
+        repo_owner = args['repo_owner']
+        environment = args['environment'].lower()
+        if args['cc_mail']:
+            cc_mail = args['cc_mail']
+        else:
+            cc_mail = ''
+        status = 'NEW'
 
-    output.log('Release Notes', True)
-    output.log(description)
+        output = OutputHelper()
+        output.log('Create deployment ticket', True, True)
+        notes = ReleaseNotes(repo_owner, application, environment)
+        description = notes.get_release_notes()
+        release_num = notes.last_tag
+        output.log('Release Notes', True)
+        output.log(description)
 
-    ticket = BugzillaRESTAPI(
-        url_bugzilla, bugzilla_username, bugzilla_password)
-
-    ticket.create_bug(
-        release_num, repo, environment, status, description)
-
-
-if __name__ == '__main__':
-    main()
+        ticket.bug_create(
+            release_num, application, environment, status, description, cc_mail
+        )
