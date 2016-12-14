@@ -27,3 +27,24 @@ clean:
 	find . -name '*.pyc' -delete
 	find . -name '__pycache__' -type d -exec rm -fr {} \;
 
+#---------------------------------------
+# for dev branch only
+#---------------------------------------
+
+# Create dist, egg dirs, upload package to pypi
+pypi:
+	$(PYTHON) setup.py sdist upload -r pypi
+	$(PYTHON) setup.py bdist_egg upload -r pypi
+
+# Create dist, egg dirs, upload package to testpypi
+testpypi:
+	$(PYTHON) setup.py sdist upload -r testpypi
+	$(PYTHON) setup.py bdist_egg upload -r testpypi
+
+# Register this project to Python Package Index
+pypi-register:
+	$(PYTHON) setup.py register -r pypi
+
+# Register this project to Test Python Package Index
+testpypi-register:
+	$(PYTHON) setup.py register -r testpypi

@@ -1,11 +1,12 @@
+***********************************
 deploy-tix
-=============
+***********************************
 
-Python scripts to generate Bugzilla deployment tickets for Mozilla Services.
+Python scripts to generate deployment tickets for Mozilla Services in Bugzilla or github.
 
-Note: still under development. FOR OPS USE ONLY.
+Note: still under development. FOR FIREFOX TEST ENG ONLY
 
-.. image:: https://travis-ci.org/rpappalax/deploy-tix.svg?branch=dev-rpapa
+.. image:: https://travis-ci.org/rpappalax/deploy-tix.svg
     :target: https://travis-ci.org/rpappalax/deploy-tix
 
 .. image:: https://coveralls.io/repos/rpappalax/deploy-tix/badge.svg
@@ -15,12 +16,9 @@ Note: still under development. FOR OPS USE ONLY.
 
 
 **Supported projects**
- - loop-client
- - loop-server
- - msisdn-gateway
+
  - shavar
- - readinglist
- - pushgo (no CHANGELOG)
+ - autopush
 
 **Example**
 
@@ -58,14 +56,19 @@ Note: still under development. FOR OPS USE ONLY.
 
 
 Setup
------------
+--------------------------------------------------------------
+
+Create github access token
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 deploy-tix will make multiple calls to github API.
 You're allowed up to 60 calls / hour without authentication, but you'll soon
 run out!
 
 Instead, create an access token from your github home page.  Go to:
-#. Settings > Applications > Generate New Token
-#. Create an environment variable 'ACCESS_TOKEN' or enter it into the config.py:
+
+  1. Settings > Applications > Generate New Token
+  2. Create an environment variable 'ACCESS_TOKEN' or enter it into the config.py:
 
  ::
 
@@ -73,8 +76,8 @@ Instead, create an access token from your github home page.  Go to:
 
 
 
-Build
------------
+Install
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
  ::
 
@@ -82,9 +85,11 @@ Build
  $ source ./venv/bin/activate
 
 
+Run from Entry Point
+--------------------------------------------------------------
 
 Run
------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 .. code:: python
@@ -103,7 +108,7 @@ Run
 
 
 Example
-----------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Post to bugzilla-dev
 
@@ -117,4 +122,52 @@ Post to bugzilla (add -z option)
  ::
 
  $ ticket -o mozilla-services -r loop-server -e STAGE -u johnny@quest.com -p password123 -z
+
+Import as Library
+--------------------------------------------------------------
+
+**Example**
+
+.. code:: python
+
+    from deploy_tix.bugzilla_rest_client import BugzillaRESTClient
+    from deploy_tix.release_notes import ReleaseNotes
+    from deploy_tix.output_helper import OutputHelper
+
+
+    # SAMPLE CODE
+    bugzilla_mozilla = False # False will post to bugzilla-dev, 
+                             # True will post to bugzilla.mozilla
+                             # equivalent to -z option when using entry point
+
+    ticket = BugzillaRESTClient(bugzilla_mozilla)
+    output = OutputHelper()
+
+    application = 'shavar'
+    repo_owner = 'mozilla-services'
+    environment = 'stage' # 'dev' # 'prod'
+    # TODO: check if registered user must have token etc.,
+    cc_mail = '<user email registered to bugzilla>'
+    status = 'NEW'
+
+    # OPTIONAL
+    #  the following lines will generate a pre-formatted description useful for deployment tickets.
+    output.log('Create deployment ticket', True, True)
+    notes = ReleaseNotes(repo_owner, application, environment)
+    description = notes.get_release_notes()
+    release_num = notes.last_tag
+    output.log('Release Notes', True)
+    output.log(description)
+
+    # Create a new ticket
+    ticket.bug_create(
+        release_num, application, environment, status, description, cc_mail
+    )   
+
+    # Update an existing ticket
+    comment = 'a new comment to post in ticket'
+    bug_id = '12345678' # Use bug num for Bugzilla, github issue num for github
+    ticket.bug_update(application, comment, bug_id)
+
+
 

@@ -11,4 +11,5 @@ sdist/
 *.egg-info/
 .noseids
 .tox/
+*BAK
 

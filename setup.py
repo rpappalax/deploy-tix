@@ -9,7 +9,7 @@ with open(os.path.join(here, 'README.rst')) as f:
     README = f.read()
 
 REQUIREMENTS = [
-    'argparse >= 1.3.0',
+    'argparse >= 1.4.0',
     'requests >= 2.5.1'
 ]
 
@@ -27,8 +27,8 @@ KEYWORDS = [
 
 setup(
     name='deploy-tix',
-    version='0.0.2',
-    description='Python scripts for creating deployment tickets in Bugzilla',
+    version='0.0.5',
+    description='Python scripts for creating services deployment tickets',
     author='Richard Pappalardo',
     author_email='rpappalax@gmail.com',
     url='https://github.com/rpappalax/deploy-tix',
@@ -39,9 +39,8 @@ setup(
     packages=['deploy_tix'],
     classifiers=[
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.5',
     ],
     entry_points={
         'console_scripts': [
