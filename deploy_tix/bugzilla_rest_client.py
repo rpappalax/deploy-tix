@@ -37,25 +37,29 @@ class InvalidCredentials(Exception):
 class BugzillaRESTClient(object):
     """"Used for CRUD operations against Bugzilla REST API"""
 
-    def __init__(self, bugzilla_mozilla):
+    def __init__(self, go_live):
 
         self.output = OutputHelper()
-        self.bugzilla_mozilla = bugzilla_mozilla
 
         # bugzilla-dev doesn't mirror the same components,
         # so we'll populate these conditionally
-        if bugzilla_mozilla:
-            self.username = BUGZILLA_USERNAME
-            self.password = BUGZILLA_PASSWORD
-            self.bugzilla_product = PRODUCT_PROD
-            self.bugzilla_component = COMPONENT_PROD
-            self.host = URL_BUGZILLA_PROD
-        else:
+        if not go_live:
+            print('SANDBOX - DO DEV')
+            exit()
             self.username = BUGZILLA_DEV_USERNAME
             self.password = BUGZILLA_DEV_PASSWORD
             self.bugzilla_product = PRODUCT_DEV
             self.bugzilla_component = COMPONENT_DEV
             self.host = URL_BUGZILLA_DEV
+
+        else:
+            print('NOT SANDBOX - DO PROD')
+            exit()
+            self.username = BUGZILLA_USERNAME
+            self.password = BUGZILLA_PASSWORD
+            self.bugzilla_product = PRODUCT_PROD
+            self.bugzilla_component = COMPONENT_PROD
+            self.host = URL_BUGZILLA_PROD
         self.token = self.get_token(self.host)
 
     def _get_json_create(
@@ -262,8 +266,8 @@ class BugzillaRESTClient(object):
 def main():
 
     # Example: bug create
-    bugzilla_mozilla = False
-    bz = BugzillaRESTClient(bugzilla_mozilla)
+    go_live = False 
+    bz = BugzillaRESTClient(go_live)
 
     bug_info = {
         'release_num': '0.18.0',

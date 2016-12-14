@@ -17,8 +17,8 @@ def main(args=None):
         required=True)
 
     parser.add_argument(
-        '-B', '--bugzilla-mozilla',
-        help='Set this switch to post directly to bugzilla.mozilla.org \
+        '-l', '--go-live',
+        help='Use this switch to post directly to bugzilla.mozilla.org \
             (without switch posts to: bugzilla-dev.allizom.org)',
         action='store_true',
         default=False,
@@ -67,9 +67,9 @@ def main(args=None):
     args = vars(parser.parse_args())
 
     application = args['application']
-    bugzilla_mozilla = args['bugzilla_mozilla']
+    go_live = args['go_live']
 
-    ticket = BugzillaRESTClient(bugzilla_mozilla)
+    ticket = BugzillaRESTClient(go_live)
 
     if all(key in args for key in ['bug_id', 'comment']):
         bug_id = args['bug_id']

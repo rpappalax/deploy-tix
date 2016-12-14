@@ -136,11 +136,14 @@ Import as Library
 
 
     # SAMPLE CODE
-    bugzilla_mozilla = False # False will post to bugzilla-dev, 
-                             # True will post to bugzilla.mozilla
-                             # equivalent to -z option when using entry point
 
-    ticket = BugzillaRESTClient(bugzilla_mozilla)
+    # Default post to bugzilla-dev, 
+    # True will post to bugzilla.mozilla
+    # equivalent to -l option when using entry point
+
+    go_live = False 
+
+    ticket = BugzillaRESTClient(go_live)
     output = OutputHelper()
 
     application = 'shavar'
